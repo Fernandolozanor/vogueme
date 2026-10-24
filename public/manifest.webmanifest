@@ -1,0 +1,58 @@
+{
+  "name": "VogueMe — Estilista & Armario Inteligente",
+  "short_name": "VogueMe",
+  "description": "Tu estilista personal con IA on-device, análisis de visagismo facial, digitalización de prendas y privacidad Zero-Biometric.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FAF8F5",
+  "theme_color": "#FAF8F5",
+  "orientation": "portrait",
+  "categories": ["lifestyle", "shopping", "fashion"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Look de Hoy",
+      "short_name": "Look",
+      "url": "/?tab=stylist",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mi Armario",
+      "short_name": "Armario",
+      "url": "/?tab=closet",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Análisis Facial & Perfil",
+      "short_name": "Perfil",
+      "url": "/?tab=profile",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
