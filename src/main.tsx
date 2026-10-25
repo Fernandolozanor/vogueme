@@ -9,6 +9,7 @@ if ('serviceWorker' in navigator) {
     const swUrl = `${import.meta.env.BASE_URL}sw.js`;
     navigator.serviceWorker.register(swUrl).then(
       (registration) => {
+        registration.update();
         console.log('✨ VogueMe PWA Service Worker activo con alcance:', registration.scope);
       },
       (error) => {

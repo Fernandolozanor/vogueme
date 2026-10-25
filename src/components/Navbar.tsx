@@ -26,18 +26,18 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, clothesC
       {/* Top Editorial Header */}
       <header className="sticky top-0 z-40 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-[#E8E2D6] px-3 sm:px-4 lg:px-8 py-3.5 transition-all w-full max-w-full overflow-x-hidden">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 w-full">
-          <div className="flex items-center gap-6 min-w-0">
+          <div className="flex items-center gap-6 shrink-0">
             <button 
               onClick={() => onTabChange('stylist')}
-              className="group text-left cursor-pointer focus:outline-none min-w-0"
+              className="group text-left cursor-pointer focus:outline-none shrink-0"
             >
-              <div className="flex items-baseline gap-1.5 min-w-0">
-                <span className="font-serif text-2xl lg:text-3xl font-bold tracking-tight text-neutral-900 group-hover:opacity-85 transition-opacity truncate">
+              <div className="flex items-baseline gap-1.5 shrink-0">
+                <span className="font-serif text-2xl lg:text-3xl font-bold tracking-tight text-neutral-900 group-hover:opacity-85 transition-opacity shrink-0 whitespace-nowrap">
                   Vogue<span className="italic font-normal text-rose-950">Me</span>
                 </span>
-                <span className="text-[10px] tracking-widest uppercase font-semibold text-neutral-400 shrink-0">Atelier</span>
+                <span className="text-[10px] tracking-widest uppercase font-semibold text-neutral-400 shrink-0 hidden sm:inline">Atelier</span>
               </div>
-              <p className="text-[11px] text-neutral-500 tracking-wide -mt-1 hidden sm:block truncate">
+              <p className="text-[11px] text-neutral-500 tracking-wide -mt-1 hidden sm:block">
                 Tu estilista IA & armario inteligente
               </p>
             </button>
@@ -77,11 +77,12 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, clothesC
             {onOpenCalendar && (
               <button
                 onClick={onOpenCalendar}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/90 hover:bg-white text-neutral-800 text-xs font-semibold border border-[#E2DBD0] hover:border-neutral-400 cursor-pointer shadow-2xs transition-all shrink-0"
+                className="flex items-center justify-center p-1.5 sm:px-2.5 sm:py-1.5 rounded-full bg-white/90 hover:bg-white text-neutral-800 text-xs font-semibold border border-[#E2DBD0] hover:border-neutral-400 cursor-pointer shadow-2xs transition-all shrink-0"
                 title="Abrir Calendario de Outfits y Control de Repetición"
+                aria-label="Abrir Calendario"
               >
-                <Calendar className="w-3.5 h-3.5 text-rose-900" />
-                <span className="hidden sm:inline">Calendario</span>
+                <Calendar className="w-3.5 h-3.5 text-rose-900 shrink-0" />
+                <span className="hidden sm:inline ml-1">Calendario</span>
               </button>
             )}
             <PrivacyBadge />

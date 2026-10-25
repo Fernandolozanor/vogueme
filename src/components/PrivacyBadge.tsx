@@ -9,13 +9,16 @@ export const PrivacyBadge: React.FC = () => {
     <>
       <button
         onClick={() => setShowModal(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#ECE7DE] text-[#4A443A] hover:bg-[#E2DBCF] transition-all cursor-pointer border border-[#DBD2C3]"
-        title="Ver compromiso de privacidad"
+        className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-[#ECE7DE] text-[#4A443A] hover:bg-[#E2DBCF] transition-all cursor-pointer border border-[#DBD2C3] shrink-0"
+        title="Ver compromiso de privacidad: 100% On-Device"
       >
-        <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-        <span className="font-semibold text-emerald-800">100% On-Device</span>
-        <span className="hidden sm:inline text-neutral-600">• Tus fotos no salen de tu móvil</span>
-        <Info className="w-3 h-3 text-neutral-500 ml-0.5" />
+        <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+        <span className="font-semibold text-emerald-800 text-[11px] sm:text-xs">
+          <span className="sm:hidden">Local</span>
+          <span className="hidden sm:inline">100% On-Device</span>
+        </span>
+        <span className="hidden md:inline text-neutral-600">• Tus fotos no salen de tu móvil</span>
+        <Info className="w-3 h-3 text-neutral-500 shrink-0 ml-0.5" />
       </button>
 
       {/* Render modal directly in document.body via Portal to escape all stacking contexts */}
