@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Satin Charcoal Gradient -->
+    <linearGradient id="bgGradVme" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#24201C"/>
+      <stop offset="50%" stop-color="#171513"/>
+      <stop offset="100%" stop-color="#0A0908"/>
+    </linearGradient>
+
+    <!-- Champagne Gold Gradient -->
+    <linearGradient id="goldVme" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF9"/>
+      <stop offset="35%" stop-color="#F5E6CC"/>
+      <stop offset="70%" stop-color="#DCBF94"/>
+      <stop offset="100%" stop-color="#BA9560"/>
+    </linearGradient>
+
+    <!-- Rose Gold / Burgundy Accent -->
+    <linearGradient id="roseAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8B4B8"/>
+      <stop offset="100%" stop-color="#A22A3C"/>
+    </linearGradient>
+
+    <filter id="shadowVme" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+
+    <filter id="softGlowVme" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- iOS Squircle Rounded Frame -->
+  <rect width="512" height="512" rx="120" fill="url(#bgGradVme)"/>
+  <rect x="10" y="10" width="492" height="492" rx="112" fill="none" stroke="url(#goldVme)" stroke-width="2.5" stroke-opacity="0.3"/>
+
+  <!-- Monogram Vme Group -->
+  <g filter="url(#shadowVme)" transform="translate(10, 0)">
+    
+    <!-- Hero Capital V (High Fashion Didot) -->
+    <!-- Left thick stem -->
+    <polygon points="120,150 180,150 250,360 198,360" fill="url(#goldVme)"/>
+    <!-- Top left serif -->
+    <rect x="106" y="146" width="90" height="12" rx="2" fill="url(#goldVme)"/>
+
+    <!-- Right hairline stem -->
+    <polygon points="320,150 342,150 250,378 234,378" fill="url(#goldVme)"/>
+    <!-- Top right serif -->
+    <rect x="306" y="146" width="50" height="12" rx="2" fill="url(#goldVme)"/>
+
+    <!-- Italic Fluid "me" Nestled into the Right Side -->
+    <!-- 'm' letterform -->
+    <path d="M 282 305 C 282 270 298 252 318 252 C 334 252 344 262 348 278 C 354 262 368 252 386 252 C 408 252 420 268 420 295 L 420 360 L 400 360 L 400 300 C 400 280 392 270 378 270 C 364 270 354 282 352 300 L 352 360 L 332 360 L 332 300 C 332 280 324 270 310 270 C 298 270 288 280 286 298 L 286 360 L 266 360 L 266 255 L 286 255 Z" 
+          fill="url(#goldVme)"/>
+
+    <!-- 'e' letterform with couture flourish loop -->
+    <path d="M 434 308 C 434 272 452 252 478 252 C 502 252 516 270 516 304 C 516 312 515 318 514 322 L 452 322 C 454 344 466 352 482 352 C 494 352 504 346 510 338 L 522 350 C 512 364 496 372 478 372 C 450 372 434 350 434 308 Z M 498 306 C 498 282 490 268 476 268 C 462 268 454 282 452 306 Z" 
+          fill="url(#roseAccent)" transform="translate(-10, 0)"/>
+
+    <!-- Sparkle Atelier Star over the V apex -->
+    <path d="M 342 134 Q 342 154 362 154 Q 342 154 342 174 Q 342 154 322 154 Q 342 154 342 134 Z" 
+          fill="#FFFDF8" filter="url(#softGlowVme)"/>
+    <circle cx="342" cy="154" r="3.5" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Bottom Brandmark Signature -->
+  <text x="256" y="445" font-family="'Playfair Display', serif" font-size="20" font-weight="600" fill="#EADBBE" letter-spacing="8" text-anchor="middle" opacity="0.85">VOGUEME</text>
+  <text x="256" y="468" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="600" fill="#A89274" letter-spacing="4" text-anchor="middle">ATELIER MONOGRAM</text>
+</svg>
