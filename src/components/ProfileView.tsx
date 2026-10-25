@@ -19,7 +19,7 @@ import {
   CheckCircle2,
   HelpCircle
 } from 'lucide-react';
-import type { UserProfile, ColorSeason, BodyShape, StyleTag, FaceShape } from '../types';
+import type { UserProfile, ColorSeason, BodyShape, StyleTag, FaceShape, ColorSwatch } from '../types';
 import { ColorSeasonModal } from './ColorSeasonModal';
 import { 
   extractLocalBiometricFeatures,
@@ -85,66 +85,186 @@ const HAIR_COLORS_PRESETS = [
   { label: 'Pelirrojo / Cobrizo cálido', hex: '#B3541E' }
 ];
 
-const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors: string[]; avoidColors: string[] }> = {
+const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors: ColorSwatch[]; avoidColors: ColorSwatch[] }> = {
   'Otoño Suave': {
     description: 'Tonos tierra cálidos, apagados y aterciopelados. El beige, camel, terracota, oliva y marrón chocolate potencian tu luminosidad.',
-    bestColors: ['#D8C7B5', '#C3684B', '#4A2E1B', '#708238', '#C5A880'],
-    avoidColors: ['#000000', '#00FFFF', '#FF00FF']
+    bestColors: [
+      { name: 'Beige arena', hex: '#D8C7B5' },
+      { name: 'Terracota suave', hex: '#C3684B' },
+      { name: 'Marrón café', hex: '#4A2E1B' },
+      { name: 'Verde oliva', hex: '#708238' },
+      { name: 'Camel tostado', hex: '#C5A880' }
+    ],
+    avoidColors: [
+      { name: 'Negro puro', hex: '#000000' },
+      { name: 'Cian puro', hex: '#00FFFF' },
+      { name: 'Fucsia flúor', hex: '#FF00FF' }
+    ]
   },
   'Otoño Cálido': {
     description: 'Colores otoñales ricos y dorados. Mostaza, teja, caldera, verde bosque y tonos bronce.',
-    bestColors: ['#C5A059', '#B3541E', '#2D4B36', '#8B4513', '#E07A5F'],
-    avoidColors: ['#E0F7FA', '#B0BEC5', '#E1BEE7']
+    bestColors: [
+      { name: 'Mostaza dorada', hex: '#C5A059' },
+      { name: 'Caldera / Teja', hex: '#B3541E' },
+      { name: 'Verde bosque', hex: '#2D4B36' },
+      { name: 'Cuero / Caramelo', hex: '#8B4513' },
+      { name: 'Coral tostado', hex: '#E07A5F' }
+    ],
+    avoidColors: [
+      { name: 'Celeste frío', hex: '#E0F7FA' },
+      { name: 'Gris acero', hex: '#B0BEC5' },
+      { name: 'Lila pastel', hex: '#E1BEE7' }
+    ]
   },
   'Otoño Profundo': {
     description: 'Colores intensos, cálidos y profundos. Granate, verde petróleo, cacao y café oscuro.',
-    bestColors: ['#4A0E17', '#1B3B36', '#3D2314', '#D4AF37', '#7F1D1D'],
-    avoidColors: ['#FFFDD0', '#E0F2FE', '#FCE7F3']
+    bestColors: [
+      { name: 'Granate vino', hex: '#4A0E17' },
+      { name: 'Verde petróleo', hex: '#1B3B36' },
+      { name: 'Chocolate oscuro', hex: '#3D2314' },
+      { name: 'Oro viejo', hex: '#D4AF37' },
+      { name: 'Rojo borgoña', hex: '#7F1D1D' }
+    ],
+    avoidColors: [
+      { name: 'Crema pálido', hex: '#FFFDD0' },
+      { name: 'Azul hielo', hex: '#E0F2FE' },
+      { name: 'Rosa bebé', hex: '#FCE7F3' }
+    ]
   },
   'Invierno Frío': {
     description: 'Contraste frío y puro. Blanco nuclear, negro absoluto, azul marino profundo, rubí y magenta.',
-    bestColors: ['#FFFFFF', '#0A0A0A', '#1E3A8A', '#BE123C', '#701A75'],
-    avoidColors: ['#D97706', '#B45309', '#CA8A04']
+    bestColors: [
+      { name: 'Blanco puro', hex: '#FFFFFF' },
+      { name: 'Negro azabache', hex: '#0A0A0A' },
+      { name: 'Azul marino frío', hex: '#1E3A8A' },
+      { name: 'Rojo rubí', hex: '#BE123C' },
+      { name: 'Púrpura real', hex: '#701A75' }
+    ],
+    avoidColors: [
+      { name: 'Naranja tostado', hex: '#D97706' },
+      { name: 'Teja cálido', hex: '#B45309' },
+      { name: 'Mostaza dorada', hex: '#CA8A04' }
+    ]
   },
   'Invierno Brillante': {
     description: 'Colores vibrantes, joya y de alto impacto con base fría: zafiro, fucsia eléctrico, esmeralda y blanco puro.',
-    bestColors: ['#2563EB', '#EC4899', '#059669', '#FFFFFF', '#0F172A'],
-    avoidColors: ['#D97706', '#92400E', '#78350F']
+    bestColors: [
+      { name: 'Azul cobalto', hex: '#2563EB' },
+      { name: 'Fucsia eléctrico', hex: '#EC4899' },
+      { name: 'Esmeralda puro', hex: '#059669' },
+      { name: 'Blanco nuclear', hex: '#FFFFFF' },
+      { name: 'Negro noche', hex: '#0F172A' }
+    ],
+    avoidColors: [
+      { name: 'Ocre mostaza', hex: '#D97706' },
+      { name: 'Marrón barro', hex: '#92400E' },
+      { name: 'Camel apagado', hex: '#78350F' }
+    ]
   },
   'Invierno Profundo': {
     description: 'Tonos oscuros y penetrantes: cereza oscuro, berenjena, carbón y azul noche.',
-    bestColors: ['#450A0A', '#3B0764', '#1E293B', '#831843', '#0F172A'],
-    avoidColors: ['#FEF08A', '#FED7AA', '#FDE68A']
+    bestColors: [
+      { name: 'Cereza oscuro', hex: '#450A0A' },
+      { name: 'Berenjena intenso', hex: '#3B0764' },
+      { name: 'Gris carbón', hex: '#1E293B' },
+      { name: 'Magenta oscuro', hex: '#831843' },
+      { name: 'Azul noche', hex: '#0F172A' }
+    ],
+    avoidColors: [
+      { name: 'Amarillo suave', hex: '#FEF08A' },
+      { name: 'Melocotón pastel', hex: '#FED7AA' },
+      { name: 'Vainilla pálido', hex: '#FDE68A' }
+    ]
   },
   'Primavera Clara': {
     description: 'Tonos pastel cálidos, luminosos y frescos: melocotón, aguamarina, coral suave y marfil.',
-    bestColors: ['#FED7AA', '#A7F3D0', '#F472B6', '#FFFBEB', '#FDE047'],
-    avoidColors: ['#0F172A', '#374151', '#111827']
+    bestColors: [
+      { name: 'Melocotón suave', hex: '#FED7AA' },
+      { name: 'Verde menta', hex: '#A7F3D0' },
+      { name: 'Rosa coralino', hex: '#F472B6' },
+      { name: 'Marfil cálido', hex: '#FFFBEB' },
+      { name: 'Amarillo sol', hex: '#FDE047' }
+    ],
+    avoidColors: [
+      { name: 'Negro noche', hex: '#0F172A' },
+      { name: 'Gris antracita', hex: '#374151' },
+      { name: 'Azul tinta', hex: '#111827' }
+    ]
   },
   'Primavera Cálida': {
     description: 'Colores dorados, vivos y radiantes: coral, turquesa cálido, verde lima y amarillo mantequilla.',
-    bestColors: ['#FB923C', '#2DD4BF', '#A3E635', '#FACC15', '#EA580C'],
-    avoidColors: ['#1E293B', '#475569', '#64748B']
+    bestColors: [
+      { name: 'Coral vibrante', hex: '#FB923C' },
+      { name: 'Turquesa cálido', hex: '#2DD4BF' },
+      { name: 'Verde lima', hex: '#A3E635' },
+      { name: 'Amarillo oro', hex: '#FACC15' },
+      { name: 'Naranja amapola', hex: '#EA580C' }
+    ],
+    avoidColors: [
+      { name: 'Azul pizarra', hex: '#1E293B' },
+      { name: 'Gris ceniza', hex: '#475569' },
+      { name: 'Gris plomo', hex: '#64748B' }
+    ]
   },
   'Primavera Brillante': {
     description: 'Colores vivos, alegres y cristalinos: rojo amapola, fucsia cálido y verde manzana.',
-    bestColors: ['#EF4444', '#F43F5E', '#10B981', '#3B82F6', '#F59E0B'],
-    avoidColors: ['#71717A', '#52525B', '#3F3F46']
+    bestColors: [
+      { name: 'Rojo amapola', hex: '#EF4444' },
+      { name: 'Sandía brillante', hex: '#F43F5E' },
+      { name: 'Verde esmeralda', hex: '#10B981' },
+      { name: 'Azul eléctrico', hex: '#3B82F6' },
+      { name: 'Ámbar brillante', hex: '#F59E0B' }
+    ],
+    avoidColors: [
+      { name: 'Gris topo', hex: '#71717A' },
+      { name: 'Gris mate', hex: '#52525B' },
+      { name: 'Marrón ceniza', hex: '#3F3F46' }
+    ]
   },
   'Verano Claro': {
     description: 'Tonos suaves, fríos y empolvados: rosa bebé, azul cielo, lavanda y gris perla.',
-    bestColors: ['#FBCFE8', '#BAE6FD', '#E9D5FF', '#E2E8F0', '#93C5FD'],
-    avoidColors: ['#78350F', '#B45309', '#EA580C']
+    bestColors: [
+      { name: 'Rosa pastel', hex: '#FBCFE8' },
+      { name: 'Azul cielo', hex: '#BAE6FD' },
+      { name: 'Lavanda suave', hex: '#E9D5FF' },
+      { name: 'Gris perla', hex: '#E2E8F0' },
+      { name: 'Azul bebé', hex: '#93C5FD' }
+    ],
+    avoidColors: [
+      { name: 'Marrón cálido', hex: '#78350F' },
+      { name: 'Caldera fuerte', hex: '#B45309' },
+      { name: 'Naranja teja', hex: '#EA580C' }
+    ]
   },
   'Verano Suave': {
     description: 'Tonos neutros fríos y empolvados: malva, verde salvia apagado, azul acero y rosa ceniza.',
-    bestColors: ['#C084FC', '#94A3B8', '#86EFAC', '#F472B6', '#64748B'],
-    avoidColors: ['#EA580C', '#D97706', '#EAB308']
+    bestColors: [
+      { name: 'Malva empolvado', hex: '#C084FC' },
+      { name: 'Gris pizarra', hex: '#94A3B8' },
+      { name: 'Verde salvia', hex: '#86EFAC' },
+      { name: 'Rosa ceniza', hex: '#F472B6' },
+      { name: 'Azul denim suave', hex: '#64748B' }
+    ],
+    avoidColors: [
+      { name: 'Naranja caldera', hex: '#EA580C' },
+      { name: 'Mostaza ocre', hex: '#D97706' },
+      { name: 'Amarillo dorado', hex: '#EAB308' }
+    ]
   },
   'Verano Frío': {
     description: 'Azules gélidos, frambuesa, gris azulado y rosa frío.',
-    bestColors: ['#38BDF8', '#BE185D', '#64748B', '#E0E7FF', '#1E40AF'],
-    avoidColors: ['#B45309', '#CA8A04', '#D97706']
+    bestColors: [
+      { name: 'Azul hielo', hex: '#38BDF8' },
+      { name: 'Frambuesa frío', hex: '#BE185D' },
+      { name: 'Azul acero', hex: '#64748B' },
+      { name: 'Blanco lavanda', hex: '#E0E7FF' },
+      { name: 'Azul marino suave', hex: '#1E40AF' }
+    ],
+    avoidColors: [
+      { name: 'Marrón teja', hex: '#B45309' },
+      { name: 'Mostaza cálida', hex: '#CA8A04' },
+      { name: 'Calabaza / Óxido', hex: '#D97706' }
+    ]
   }
 };
 
@@ -1055,14 +1175,16 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
               <span className="text-xs font-bold uppercase tracking-wider text-neutral-600 block mb-2">
                 Tus Colores Estrella (Potencian tu brillo):
               </span>
-              <div className="flex items-center gap-2">
-                {currentSeasonData.bestColors.map((hex, i) => (
-                  <div key={i} className="flex-1 text-center">
+              <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                {currentSeasonData.bestColors.map((color, i) => (
+                  <div key={i} className="text-center group" title={`${color.name} (${color.hex})`}>
                     <div 
-                      className="h-10 rounded-xl border border-black/10 shadow-2xs mb-1" 
-                      style={{ backgroundColor: hex }} 
+                      className="h-10 sm:h-12 rounded-xl border border-black/10 shadow-2xs mb-1.5 transition-transform group-hover:scale-105" 
+                      style={{ backgroundColor: color.hex }} 
                     />
-                    <span className="text-[9px] text-neutral-500 font-mono">{hex}</span>
+                    <span className="text-[9.5px] sm:text-[10.5px] text-neutral-800 font-medium block truncate leading-tight">
+                      {color.name}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -1073,14 +1195,16 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
               <span className="text-xs font-bold uppercase tracking-wider text-neutral-500 block mb-2">
                 Colores a evitar cerca del rostro:
               </span>
-              <div className="flex items-center gap-2">
-                {currentSeasonData.avoidColors.map((hex, i) => (
-                  <div key={i} className="flex-1 text-center opacity-80">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+                {currentSeasonData.avoidColors.map((color, i) => (
+                  <div key={i} className="text-center opacity-85 group" title={`${color.name} (${color.hex})`}>
                     <div 
-                      className="h-7 rounded-lg border border-black/10 mb-1" 
-                      style={{ backgroundColor: hex }} 
+                      className="h-7 sm:h-8 rounded-lg border border-black/10 mb-1 transition-transform group-hover:scale-105" 
+                      style={{ backgroundColor: color.hex }} 
                     />
-                    <span className="text-[9px] text-neutral-400 font-mono">{hex}</span>
+                    <span className="text-[9.5px] sm:text-[10.5px] text-neutral-600 font-medium block truncate leading-tight">
+                      {color.name}
+                    </span>
                   </div>
                 ))}
               </div>

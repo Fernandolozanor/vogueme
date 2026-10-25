@@ -46,6 +46,11 @@ export type ColorSeason =
   | 'Verano Suave' 
   | 'Verano Frío';
 
+export interface ColorSwatch {
+  name: string;
+  hex: string;
+}
+
 export type FaceShape = 
   | 'ovalada' 
   | 'redonda' 

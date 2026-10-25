@@ -11,7 +11,7 @@ import {
   Eye,
   Shirt
 } from 'lucide-react';
-import type { ColorSeason } from '../types';
+import type { ColorSeason, ColorSwatch } from '../types';
 
 interface ColorSeasonModalProps {
   isOpen: boolean;
@@ -26,7 +26,7 @@ const SEASONS_SUMMARY: Record<string, {
   depth: 'Claro' | 'Profundo' | 'Medio';
   contrast: 'Brillante' | 'Suave' | 'Medio';
   description: string;
-  sampleColors: string[];
+  sampleColors: ColorSwatch[];
   icon: string;
 }> = {
   'Primavera': {
@@ -36,7 +36,13 @@ const SEASONS_SUMMARY: Record<string, {
     depth: 'Claro',
     contrast: 'Brillante',
     description: 'Tonos vivos, dorados, cristalinos y alegres. Melocotón, coral, verde manzana, turquesa cálido y amarillo mantequilla.',
-    sampleColors: ['#FB923C', '#2DD4BF', '#A3E635', '#FACC15', '#EA580C'],
+    sampleColors: [
+      { name: 'Coral vivo', hex: '#FB923C' },
+      { name: 'Turquesa cálido', hex: '#2DD4BF' },
+      { name: 'Verde lima', hex: '#A3E635' },
+      { name: 'Amarillo oro', hex: '#FACC15' },
+      { name: 'Naranja amapola', hex: '#EA580C' }
+    ],
     icon: '🌸'
   },
   'Verano': {
@@ -46,7 +52,13 @@ const SEASONS_SUMMARY: Record<string, {
     depth: 'Claro',
     contrast: 'Suave',
     description: 'Tonos suaves, fríos y azulados con efecto aterciopelado. Rosa empolvado, lavanda, azul cielo, verde salvia y gris perla.',
-    sampleColors: ['#FBCFE8', '#BAE6FD', '#E9D5FF', '#93C5FD', '#94A3B8'],
+    sampleColors: [
+      { name: 'Rosa pastel', hex: '#FBCFE8' },
+      { name: 'Azul cielo', hex: '#BAE6FD' },
+      { name: 'Lavanda', hex: '#E9D5FF' },
+      { name: 'Azul bebé', hex: '#93C5FD' },
+      { name: 'Gris perla', hex: '#94A3B8' }
+    ],
     icon: '☀️'
   },
   'Otoño': {
@@ -56,7 +68,13 @@ const SEASONS_SUMMARY: Record<string, {
     depth: 'Profundo',
     contrast: 'Suave',
     description: 'Tonos tierra ricos, dorados y tostados. Terracota, mostaza, caldera, verde oliva, camel y marrón chocolate.',
-    sampleColors: ['#D8C7B5', '#C3684B', '#4A2E1B', '#708238', '#C5A059'],
+    sampleColors: [
+      { name: 'Beige arena', hex: '#D8C7B5' },
+      { name: 'Terracota', hex: '#C3684B' },
+      { name: 'Marrón café', hex: '#4A2E1B' },
+      { name: 'Verde oliva', hex: '#708238' },
+      { name: 'Mostaza dorada', hex: '#C5A059' }
+    ],
     icon: '🍂'
   },
   'Invierno': {
@@ -66,7 +84,13 @@ const SEASONS_SUMMARY: Record<string, {
     depth: 'Profundo',
     contrast: 'Brillante',
     description: 'Colores puros, intensos y tonos joya con alto contraste. Blanco nuclear, negro absoluto, zafiro, fucsia eléctrico y rubí.',
-    sampleColors: ['#FFFFFF', '#0A0A0A', '#1E3A8A', '#BE123C', '#2563EB'],
+    sampleColors: [
+      { name: 'Blanco nuclear', hex: '#FFFFFF' },
+      { name: 'Negro azabache', hex: '#0A0A0A' },
+      { name: 'Azul zafiro', hex: '#1E3A8A' },
+      { name: 'Rojo rubí', hex: '#BE123C' },
+      { name: 'Azul cobalto', hex: '#2563EB' }
+    ],
     icon: '❄️'
   }
 };
@@ -234,15 +258,18 @@ export const ColorSeasonModal: React.FC<ColorSeasonModalProps> = ({
                       {season.description}
                     </p>
 
-                    {/* Paleta de muestra */}
-                    <div className="flex items-center gap-1.5">
-                      {season.sampleColors.map((hex, i) => (
-                        <div 
-                          key={i}
-                          className="h-5 flex-1 rounded-md border border-black/10 shadow-2xs"
-                          style={{ backgroundColor: hex }}
-                          title={hex}
-                        />
+                    {/* Paleta de muestra con nombres */}
+                    <div className="grid grid-cols-5 gap-1 pt-1">
+                      {season.sampleColors.map((color, i) => (
+                        <div key={i} className="text-center group" title={`${color.name} (${color.hex})`}>
+                          <div 
+                            className="h-5 rounded-md border border-black/10 shadow-2xs mb-0.5 transition-transform group-hover:scale-110"
+                            style={{ backgroundColor: color.hex }}
+                          />
+                          <span className="text-[8.5px] text-neutral-600 font-medium block truncate leading-tight">
+                            {color.name}
+                          </span>
+                        </div>
                       ))}
                     </div>
                   </div>
