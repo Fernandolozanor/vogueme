@@ -29,17 +29,24 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, clothesC
           <div className="flex items-center gap-6 shrink-0">
             <button 
               onClick={() => onTabChange('stylist')}
-              className="group text-left cursor-pointer focus:outline-none shrink-0"
+              className="group flex items-center gap-2 sm:gap-2.5 text-left cursor-pointer focus:outline-none shrink-0"
             >
-              <div className="flex items-baseline gap-1.5 shrink-0">
-                <span className="font-serif text-2xl lg:text-3xl font-bold tracking-tight text-neutral-900 group-hover:opacity-85 transition-opacity shrink-0 whitespace-nowrap">
-                  Vogue<span className="italic font-normal text-rose-950">Me</span>
-                </span>
-                <span className="text-[10px] tracking-widest uppercase font-semibold text-neutral-400 shrink-0 hidden sm:inline">Atelier</span>
+              <img 
+                src="./favicon.svg" 
+                alt="VogueMe Icon" 
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl shadow-2xs border border-[#D6CDBC]/60 shrink-0 group-hover:scale-105 transition-transform" 
+              />
+              <div className="shrink-0">
+                <div className="flex items-baseline gap-1.5 shrink-0">
+                  <span className="font-serif text-2xl lg:text-3xl font-bold tracking-tight text-neutral-900 group-hover:opacity-85 transition-opacity shrink-0 whitespace-nowrap">
+                    Vogue<span className="italic font-normal text-rose-950">Me</span>
+                  </span>
+                  <span className="text-[10px] tracking-widest uppercase font-semibold text-neutral-400 shrink-0 hidden sm:inline">Atelier</span>
+                </div>
+                <p className="text-[11px] text-neutral-500 tracking-wide -mt-1 hidden sm:block">
+                  Tu estilista IA & armario inteligente
+                </p>
               </div>
-              <p className="text-[11px] text-neutral-500 tracking-wide -mt-1 hidden sm:block">
-                Tu estilista IA & armario inteligente
-              </p>
             </button>
           </div>
 

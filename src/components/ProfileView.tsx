@@ -499,53 +499,53 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
   const faceShapeInfo = FACE_SHAPES_CONFIG[activeFaceShape] || FACE_SHAPES_CONFIG.ovalada;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-      {/* Editorial Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#E8E2D6] pb-5">
-        <div>
-          <span className="text-xs uppercase tracking-widest font-semibold text-rose-900 flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Ficha de Estilo Zero-Biometric
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-6 space-y-2 sm:space-y-8 pb-24 md:pb-12 overflow-x-hidden">
+      {/* Editorial Header (Ultra compacto en móvil para encajar las 5 tarjetas en una sola pantalla) */}
+      <div className="flex items-center justify-between gap-2 border-b border-[#E8E2D6] pb-2 sm:pb-5">
+        <div className="min-w-0">
+          <span className="text-[10px] sm:text-xs uppercase tracking-widest font-semibold text-rose-900 flex items-center gap-1">
+            <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+            Ficha de Estilo
           </span>
-          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 tracking-tight mt-1">
-            Mi Perfil <span className="italic font-normal text-rose-950">& Visagismo Facial</span>
+          <h1 className="font-serif text-lg sm:text-4xl lg:text-5xl font-bold text-neutral-900 tracking-tight leading-tight truncate sm:whitespace-normal">
+            Mi Perfil <span className="italic font-normal text-rose-950">& Visagismo</span>
           </h1>
-          <p className="text-sm text-neutral-600 mt-1 max-w-xl">
+          <p className="text-sm text-neutral-600 mt-1 max-w-xl hidden sm:block">
             Tus rasgos faciales, morfología y colorimetría analizados y <strong>100% configurables</strong> en tu dispositivo.
           </p>
         </div>
 
         <button
           onClick={handleSave}
-          className="inline-flex items-center justify-center gap-2 py-3 px-6 rounded-2xl bg-neutral-900 text-white font-medium text-xs sm:text-sm hover:bg-neutral-800 transition-all shadow-md cursor-pointer"
+          className="inline-flex items-center justify-center gap-1.5 py-1.5 sm:py-3 px-3 sm:px-6 rounded-full sm:rounded-2xl bg-neutral-900 text-white font-semibold text-xs sm:text-sm hover:bg-neutral-800 transition-all shadow-xs shrink-0 cursor-pointer"
         >
           {savedSuccess ? (
             <>
-              <Check className="w-4 h-4 text-emerald-400" />
-              <span>¡Datos Guardados!</span>
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <span>¡Guardado!</span>
             </>
           ) : (
-            <span>Guardar Cambios</span>
+            <span>Guardar</span>
           )}
         </button>
       </div>
 
       {/* TOP SECTION: Datos Personales (Nombre, Edad, Ciudad, Ocupación) */}
-      <div className="bg-white/90 border border-[#E5DFD5] rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 transition-all">
+      <div className="bg-white/90 border border-[#E5DFD5] rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-2xs space-y-2 sm:space-y-4 transition-all">
         <div 
           onClick={() => toggleMobileSection('identity')}
-          className="flex items-center justify-between border-b border-neutral-100 pb-3 cursor-pointer select-none lg:cursor-default"
+          className="flex items-center justify-between border-b border-neutral-100 pb-1.5 sm:pb-3 cursor-pointer select-none lg:cursor-default"
         >
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="w-9 h-9 rounded-full bg-rose-50 flex items-center justify-center text-rose-900 shrink-0">
-              <User className="w-5 h-5" />
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-rose-50 flex items-center justify-center text-rose-900 shrink-0">
+              <User className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 leading-snug break-words">
+              <h2 className="font-serif text-xs sm:text-xl font-bold text-neutral-900 leading-snug">
                 Datos Personales & Identidad
               </h2>
               {/* Resumen Móvil */}
-              <p className="text-xs text-rose-950/80 font-medium leading-relaxed break-words block lg:hidden mt-0.5">
+              <p className="text-[10.5px] sm:text-xs text-rose-950/80 font-medium truncate block lg:hidden mt-0.5">
                 {currentProfile.name || 'Tu nombre'} • {currentProfile.age ? currentProfile.age + ' años' : 'Edad no definida'} • {currentProfile.city || 'Ciudad no definida'}
               </p>
               <p className="text-xs text-neutral-500 hidden lg:block">
@@ -560,12 +560,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
             </span>
 
             {/* Toggle button en móvil */}
-            <div className="lg:hidden flex items-center gap-1 text-xs font-semibold text-rose-900">
+            <div className="lg:hidden flex items-center gap-1 text-[11px] font-semibold text-rose-900">
               <span>{expandedMobileSection === 'identity' ? 'Plegar' : 'Ajustar'}</span>
               {expandedMobileSection === 'identity' ? (
-                <ChevronUp className="w-4 h-4 text-rose-900" />
+                <ChevronUp className="w-3.5 h-3.5 text-rose-900" />
               ) : (
-                <ChevronDown className="w-4 h-4 text-neutral-400" />
+                <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
               )}
             </div>
           </div>
@@ -637,30 +637,30 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-8">
         
         {/* Left Column: Full Facial Analysis & Visagism Card */}
-        <div className="lg:col-span-6 space-y-6">
+        <div className="lg:col-span-6 space-y-2 sm:space-y-6">
           
           {/* ========================================================================= */}
           {/* SECCIÓN PRINCIPAL: ANÁLISIS FACIAL COMPLETO & VISAGISMO                    */}
           {/* ========================================================================= */}
-          <div className="bg-white/95 border border-[#E5DFD5] rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6 transition-all">
+          <div className="bg-white/95 border border-[#E5DFD5] rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-2xs space-y-2 sm:space-y-6 transition-all">
             
             {/* Header del Analizador */}
             <div 
               onClick={() => toggleMobileSection('facial')}
-              className="flex items-center justify-between border-b border-neutral-200 pb-3 cursor-pointer select-none lg:cursor-default"
+              className="flex items-center justify-between border-b border-neutral-200 pb-1.5 sm:pb-3 cursor-pointer select-none lg:cursor-default"
             >
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-rose-900 shrink-0" />
-                  <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 leading-snug break-words">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-rose-900 shrink-0" />
+                  <h2 className="font-serif text-xs sm:text-xl font-bold text-neutral-900 leading-snug">
                     Análisis Facial & Visagismo
                   </h2>
                 </div>
                 {/* Resumen Móvil */}
-                <p className="text-xs text-rose-950/80 font-medium leading-relaxed break-words mt-1 block lg:hidden">
+                <p className="text-[10.5px] sm:text-xs text-rose-950/80 font-medium truncate block lg:hidden mt-0.5">
                   Rostro {FACE_SHAPES_CONFIG[activeFaceShape]?.label || 'Ovalada'} • Contraste {currentProfile.facialContrast || 'medio'} • Piel {currentProfile.skinTone} ({currentProfile.skinUndertone})
                 </p>
                 <p className="text-xs text-neutral-500 mt-0.5 hidden lg:block">
@@ -674,12 +674,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                 </span>
 
                 {/* Toggle button en móvil */}
-                <div className="lg:hidden flex items-center gap-1 text-xs font-semibold text-rose-900">
+                <div className="lg:hidden flex items-center gap-1 text-[11px] font-semibold text-rose-900">
                   <span>{expandedMobileSection === 'facial' ? 'Plegar' : 'Ajustar'}</span>
                   {expandedMobileSection === 'facial' ? (
-                    <ChevronUp className="w-4 h-4 text-rose-900" />
+                    <ChevronUp className="w-3.5 h-3.5 text-rose-900" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-neutral-400" />
+                    <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
                   )}
                 </div>
               </div>
@@ -1124,21 +1124,21 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
         </div>
 
         {/* Right Column: Measurements, Body Shape & Style Vibes */}
-        <div className="lg:col-span-6 space-y-6">
+        <div className="lg:col-span-6 space-y-2 sm:space-y-6">
           
           {/* Body Shape & Measurements Box */}
-          <div className="bg-white/80 border border-[#E5DFD5] rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5 transition-all">
+          <div className="bg-white/80 border border-[#E5DFD5] rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-2xs space-y-2 sm:space-y-5 transition-all">
             <div 
               onClick={() => toggleMobileSection('morphology')}
-              className="flex items-center justify-between border-b border-neutral-200 pb-3 cursor-pointer select-none lg:cursor-default"
+              className="flex items-center justify-between border-b border-neutral-200 pb-1.5 sm:pb-3 cursor-pointer select-none lg:cursor-default"
             >
               <div className="min-w-0 flex-1">
-                <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 flex items-center gap-2 leading-snug break-words">
-                  <Ruler className="w-5 h-5 text-rose-900 shrink-0" />
-                  Morfología & Medidas
+                <h2 className="font-serif text-xs sm:text-xl font-bold text-neutral-900 flex items-center gap-1.5 sm:gap-2 leading-tight">
+                  <Ruler className="w-4 h-4 sm:w-5 sm:h-5 text-rose-900 shrink-0" />
+                  <span>Morfología & Medidas</span>
                 </h2>
                 {/* Resumen Móvil */}
-                <p className="text-xs text-rose-950/80 font-medium leading-relaxed break-words mt-1 block lg:hidden">
+                <p className="text-[10.5px] sm:text-xs text-rose-950/80 font-medium truncate block lg:hidden mt-0.5">
                   {BODY_SHAPES_INFO[currentProfile.bodyShape]?.label || 'Reloj de Arena'} • {currentProfile.heightCm || 165} cm • ({currentProfile.chestCm || 88}-{currentProfile.waistCm || 65}-{currentProfile.hipsCm || 94} cm)
                 </p>
               </div>
@@ -1147,12 +1147,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                 <span className="hidden sm:inline-block text-xs text-neutral-400">100% Confidencial</span>
                 
                 {/* Toggle button en móvil */}
-                <div className="lg:hidden flex items-center gap-1 text-xs font-semibold text-rose-900">
+                <div className="lg:hidden flex items-center gap-0.5 text-[11px] sm:text-xs font-semibold text-rose-900">
                   <span>{expandedMobileSection === 'morphology' ? 'Plegar' : 'Ajustar'}</span>
                   {expandedMobileSection === 'morphology' ? (
-                    <ChevronUp className="w-4 h-4 text-rose-900" />
+                    <ChevronUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-900" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-neutral-400" />
+                    <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-400" />
                   )}
                 </div>
               </div>
@@ -1255,17 +1255,17 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
           </div>
 
           {/* Style Preferences & Vibes */}
-          <div className="bg-white/80 border border-[#E5DFD5] rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 transition-all">
+          <div className="bg-white/80 border border-[#E5DFD5] rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-2xs space-y-2 sm:space-y-4 transition-all">
             <div 
               onClick={() => toggleMobileSection('styles')}
-              className="flex items-center justify-between border-b border-neutral-100 pb-3 cursor-pointer select-none lg:cursor-default"
+              className="flex items-center justify-between border-b border-neutral-100 pb-1.5 sm:pb-3 cursor-pointer select-none lg:cursor-default"
             >
               <div className="min-w-0 flex-1">
-                <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 leading-snug break-words">
+                <h2 className="font-serif text-xs sm:text-xl font-bold text-neutral-900 leading-tight">
                   Estilos & Vibes Predilectos
                 </h2>
                 {/* Resumen Móvil */}
-                <p className="text-xs text-rose-950/80 font-medium leading-relaxed break-words mt-1 block lg:hidden">
+                <p className="text-[10.5px] sm:text-xs text-rose-950/80 font-medium truncate block lg:hidden mt-0.5">
                   {currentProfile.preferredStyles.length > 0 
                     ? currentProfile.preferredStyles.map(s => '#' + s).join(', ') 
                     : 'Ningún estilo seleccionado'}
@@ -1275,12 +1275,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                 </p>
               </div>
 
-              <div className="lg:hidden flex items-center gap-1 text-xs font-semibold text-rose-900 shrink-0 ml-2">
+              <div className="lg:hidden flex items-center gap-0.5 text-[11px] sm:text-xs font-semibold text-rose-900 shrink-0 ml-2">
                 <span>{expandedMobileSection === 'styles' ? 'Plegar' : 'Ajustar'}</span>
                 {expandedMobileSection === 'styles' ? (
-                  <ChevronUp className="w-4 h-4 text-rose-900" />
+                  <ChevronUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-900" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-neutral-400" />
+                  <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-400" />
                 )}
               </div>
             </div>
@@ -1309,21 +1309,21 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
           </div>
 
           {/* Color Season Selector & Harmonizer */}
-          <div className="bg-[#FAF8F5] border border-[#E2DBD0] rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5 transition-all">
+          <div className="bg-[#FAF8F5] border border-[#E2DBD0] rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-2xs space-y-2 sm:space-y-5 transition-all">
             <div 
               onClick={() => toggleMobileSection('colorSeason')}
-              className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-neutral-200 pb-3 cursor-pointer select-none lg:cursor-default"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2.5 border-b border-neutral-200 pb-1.5 sm:pb-3 cursor-pointer select-none lg:cursor-default"
             >
               <div className="flex items-center justify-between w-full lg:w-auto">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <Palette className="w-5 h-5 text-rose-900 shrink-0" />
-                    <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 leading-snug break-words">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Palette className="w-4 h-4 sm:w-5 sm:h-5 text-rose-900 shrink-0" />
+                    <h2 className="font-serif text-xs sm:text-xl font-bold text-neutral-900 leading-tight">
                       Tu Estación Cromática
                     </h2>
                   </div>
                   {/* Resumen Móvil */}
-                  <p className="text-xs text-rose-950/80 font-medium leading-relaxed break-words mt-1 block lg:hidden">
+                  <p className="text-[10.5px] sm:text-xs text-rose-950/80 font-medium truncate block lg:hidden mt-0.5">
                     Paleta {currentProfile.colorSeason}
                   </p>
                 </div>
@@ -1336,19 +1336,19 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                       e.stopPropagation();
                       setIsColorSeasonModalOpen(true);
                     }}
-                    className="px-2 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-950 border border-rose-200/90 text-[11px] font-semibold flex items-center gap-1 cursor-pointer shrink-0"
+                    className="px-2 py-0.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-950 border border-rose-200/90 text-[10px] font-semibold flex items-center gap-1 cursor-pointer shrink-0"
                     title="Ver explicación completa de cómo funciona la colorimetría"
                   >
-                    <HelpCircle className="w-3.5 h-3.5 text-rose-900" />
+                    <HelpCircle className="w-3 h-3 text-rose-900" />
                     <span>Ayuda</span>
                   </button>
 
-                  <div className="flex items-center gap-0.5 text-xs font-semibold text-rose-900 shrink-0">
+                  <div className="flex items-center gap-0.5 text-[11px] sm:text-xs font-semibold text-rose-900 shrink-0">
                     <span>{expandedMobileSection === 'colorSeason' ? 'Plegar' : 'Ajustar'}</span>
                     {expandedMobileSection === 'colorSeason' ? (
-                      <ChevronUp className="w-4 h-4 text-rose-900" />
+                      <ChevronUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-900" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-neutral-400" />
+                      <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-400" />
                     )}
                   </div>
                 </div>

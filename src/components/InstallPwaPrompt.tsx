@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, Sparkles, Smartphone, Share } from 'lucide-react';
+import { Download, X, Smartphone, Share } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -79,9 +79,11 @@ export const InstallPwaPrompt: React.FC = () => {
       <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-3 duration-300 w-[92%] max-w-md">
         <div className="bg-[#1A1815] text-[#FAF8F5] p-3 rounded-2xl shadow-xl border border-[#D6CDBC]/20 flex items-center justify-between gap-3 backdrop-blur-md">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2D2A26] to-[#141312] border border-amber-300/30 flex items-center justify-center shrink-0">
-              <Sparkles className="w-4 h-4 text-amber-300" />
-            </div>
+            <img 
+              src="./favicon.svg" 
+              alt="VogueMe App Icon" 
+              className="w-9 h-9 rounded-xl border border-amber-300/30 object-cover shrink-0 shadow-xs" 
+            />
             <div className="min-w-0">
               <p className="text-xs font-semibold text-white truncate flex items-center gap-1.5">
                 <span>Instalar VogueMe App</span>
