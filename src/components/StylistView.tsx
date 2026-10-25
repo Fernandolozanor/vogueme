@@ -20,13 +20,15 @@ import {
   ArrowRight,
   Gem,
   CloudSun,
-  ZoomIn
+  ZoomIn,
+  HelpCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { ClothingItem, UserProfile, OccasionQuery, OutfitRecommendation, QuerySeason } from '../types';
 import { generateOutfitRecommendation } from '../services/stylistEngine';
 import { logOutfitWear } from '../services/storage';
 import { GarmentDetailModal } from './GarmentDetailModal';
+import { ColorSeasonModal } from './ColorSeasonModal';
 
 interface StylistViewProps {
   wardrobe: ClothingItem[];
@@ -194,6 +196,7 @@ export const StylistView: React.FC<StylistViewProps> = ({
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isAdviceModalOpen, setIsAdviceModalOpen] = useState(false);
   const [isHarmonyModalOpen, setIsHarmonyModalOpen] = useState(false);
+  const [isColorSeasonModalOpen, setIsColorSeasonModalOpen] = useState(false);
   const [selectedDetailItem, setSelectedDetailItem] = useState<{ item: ClothingItem; role: string } | null>(null);
 
   // Active outfit item references
@@ -1129,6 +1132,15 @@ export const StylistView: React.FC<StylistViewProps> = ({
                 <p className="text-[11px] text-neutral-700 leading-relaxed">
                   Puedes seleccionar otra estación cromática manualmente o volver a hacerte el escáner de selfie con luz natural desde tu perfil.
                 </p>
+
+                <button
+                  type="button"
+                  onClick={() => setIsColorSeasonModalOpen(true)}
+                  className="w-full py-2 px-3 rounded-xl bg-white hover:bg-[#FAF8F5] text-neutral-900 font-semibold text-xs flex items-center justify-center gap-1.5 border border-neutral-300 transition-colors cursor-pointer shadow-2xs mt-1"
+                >
+                  <HelpCircle className="w-3.5 h-3.5 text-rose-900" />
+                  <span>¿Cómo funciona la Colorimetría? (Guía completa)</span>
+                </button>
                 
                 {onNavigateToProfile && (
                   <button
@@ -1157,6 +1169,13 @@ export const StylistView: React.FC<StylistViewProps> = ({
         </div>,
         document.body
       )}
+
+      {/* MODAL EDUCATIVO: GUÍA DE COLORIMETRÍA */}
+      <ColorSeasonModal
+        isOpen={isColorSeasonModalOpen}
+        onClose={() => setIsColorSeasonModalOpen(false)}
+        currentSeason={profile.colorSeason}
+      />
 
       {/* MODAL FOTO AMPLIADA DE LA PRENDA */}
       <GarmentDetailModal
