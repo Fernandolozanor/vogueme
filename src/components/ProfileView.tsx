@@ -85,7 +85,12 @@ const HAIR_COLORS_PRESETS = [
   { label: 'Pelirrojo / Cobrizo cálido', hex: '#B3541E' }
 ];
 
-const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors: ColorSwatch[]; avoidColors: ColorSwatch[] }> = {
+const COLOR_SEASONS_INFO: Record<ColorSeason, { 
+  description: string; 
+  bestColors: ColorSwatch[]; 
+  faceRecommendedColors: ColorSwatch[];
+  avoidColors: ColorSwatch[]; 
+}> = {
   'Otoño Suave': {
     description: 'Tonos tierra cálidos, apagados y aterciopelados. El beige, camel, terracota, oliva y marrón chocolate potencian tu luminosidad.',
     bestColors: [
@@ -94,6 +99,12 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors:
       { name: 'Marrón café', hex: '#4A2E1B' },
       { name: 'Verde oliva', hex: '#708238' },
       { name: 'Camel tostado', hex: '#C5A880' }
+    ],
+    faceRecommendedColors: [
+      { name: 'Marfil cálido', hex: '#FFF8EE' },
+      { name: 'Terracota suave', hex: '#C3684B' },
+      { name: 'Marrón café suave', hex: '#4A2E1B' },
+      { name: 'Oro viejo / Bronce', hex: '#C5A880' }
     ],
     avoidColors: [
       { name: 'Negro puro', hex: '#000000' },
@@ -110,6 +121,12 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors:
       { name: 'Cuero / Caramelo', hex: '#8B4513' },
       { name: 'Coral tostado', hex: '#E07A5F' }
     ],
+    faceRecommendedColors: [
+      { name: 'Crema tostado', hex: '#FDF5E6' },
+      { name: 'Mostaza dorada', hex: '#C5A059' },
+      { name: 'Caldera / Teja', hex: '#B3541E' },
+      { name: 'Oro amarillo rico', hex: '#D4AF37' }
+    ],
     avoidColors: [
       { name: 'Celeste frío', hex: '#E0F7FA' },
       { name: 'Gris acero', hex: '#B0BEC5' },
@@ -124,6 +141,12 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors:
       { name: 'Chocolate oscuro', hex: '#3D2314' },
       { name: 'Oro viejo', hex: '#D4AF37' },
       { name: 'Rojo borgoña', hex: '#7F1D1D' }
+    ],
+    faceRecommendedColors: [
+      { name: 'Blanco crema denso', hex: '#F5EBE1' },
+      { name: 'Granate vino', hex: '#4A0E17' },
+      { name: 'Verde petróleo', hex: '#1B3B36' },
+      { name: 'Oro envejecido', hex: '#B8860B' }
     ],
     avoidColors: [
       { name: 'Crema pálido', hex: '#FFFDD0' },
@@ -140,6 +163,12 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors:
       { name: 'Rojo rubí', hex: '#BE123C' },
       { name: 'Púrpura real', hex: '#701A75' }
     ],
+    faceRecommendedColors: [
+      { name: 'Blanco nuclear puro', hex: '#FFFFFF' },
+      { name: 'Rojo rubí frío', hex: '#BE123C' },
+      { name: 'Azul marino noche', hex: '#1E3A8A' },
+      { name: 'Plata brillante', hex: '#E2E8F0' }
+    ],
     avoidColors: [
       { name: 'Naranja tostado', hex: '#D97706' },
       { name: 'Teja cálido', hex: '#B45309' },
@@ -154,6 +183,12 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors:
       { name: 'Esmeralda puro', hex: '#059669' },
       { name: 'Blanco nuclear', hex: '#FFFFFF' },
       { name: 'Negro noche', hex: '#0F172A' }
+    ],
+    faceRecommendedColors: [
+      { name: 'Blanco hielo', hex: '#F8FAFC' },
+      { name: 'Fucsia eléctrico', hex: '#EC4899' },
+      { name: 'Azul cobalto zafiro', hex: '#2563EB' },
+      { name: 'Plata pulida', hex: '#CBD5E1' }
     ],
     avoidColors: [
       { name: 'Ocre mostaza', hex: '#D97706' },
@@ -170,6 +205,12 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors:
       { name: 'Magenta oscuro', hex: '#831843' },
       { name: 'Azul noche', hex: '#0F172A' }
     ],
+    faceRecommendedColors: [
+      { name: 'Blanco nieve', hex: '#F1F5F9' },
+      { name: 'Cereza oscuro', hex: '#450A0A' },
+      { name: 'Berenjena real', hex: '#3B0764' },
+      { name: 'Plata oscura / Platino', hex: '#94A3B8' }
+    ],
     avoidColors: [
       { name: 'Amarillo suave', hex: '#FEF08A' },
       { name: 'Melocotón pastel', hex: '#FED7AA' },
@@ -184,6 +225,12 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors:
       { name: 'Rosa coralino', hex: '#F472B6' },
       { name: 'Marfil cálido', hex: '#FFFBEB' },
       { name: 'Amarillo sol', hex: '#FDE047' }
+    ],
+    faceRecommendedColors: [
+      { name: 'Marfil luminoso', hex: '#FFFBEB' },
+      { name: 'Melocotón coralino', hex: '#FED7AA' },
+      { name: 'Verde menta pastel', hex: '#A7F3D0' },
+      { name: 'Oro claro brillante', hex: '#FDE047' }
     ],
     avoidColors: [
       { name: 'Negro noche', hex: '#0F172A' },
@@ -200,6 +247,12 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors:
       { name: 'Amarillo oro', hex: '#FACC15' },
       { name: 'Naranja amapola', hex: '#EA580C' }
     ],
+    faceRecommendedColors: [
+      { name: 'Vainilla cálida', hex: '#FEF9C3' },
+      { name: 'Coral amapola', hex: '#FB923C' },
+      { name: 'Turquesa cálido', hex: '#2DD4BF' },
+      { name: 'Oro amarillo brillante', hex: '#FACC15' }
+    ],
     avoidColors: [
       { name: 'Azul pizarra', hex: '#1E293B' },
       { name: 'Gris ceniza', hex: '#475569' },
@@ -214,6 +267,12 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors:
       { name: 'Verde esmeralda', hex: '#10B981' },
       { name: 'Azul eléctrico', hex: '#3B82F6' },
       { name: 'Ámbar brillante', hex: '#F59E0B' }
+    ],
+    faceRecommendedColors: [
+      { name: 'Blanco marfil radiante', hex: '#FEFCE8' },
+      { name: 'Rojo amapola cristalino', hex: '#EF4444' },
+      { name: 'Esmeralda cálido', hex: '#10B981' },
+      { name: 'Oro pulido', hex: '#F59E0B' }
     ],
     avoidColors: [
       { name: 'Gris topo', hex: '#71717A' },
@@ -230,6 +289,12 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors:
       { name: 'Gris perla', hex: '#E2E8F0' },
       { name: 'Azul bebé', hex: '#93C5FD' }
     ],
+    faceRecommendedColors: [
+      { name: 'Blanco suave nube', hex: '#F8FAFC' },
+      { name: 'Rosa empolvado', hex: '#FBCFE8' },
+      { name: 'Azul cielo claro', hex: '#BAE6FD' },
+      { name: 'Plata mate', hex: '#E2E8F0' }
+    ],
     avoidColors: [
       { name: 'Marrón cálido', hex: '#78350F' },
       { name: 'Caldera fuerte', hex: '#B45309' },
@@ -245,6 +310,12 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors:
       { name: 'Rosa ceniza', hex: '#F472B6' },
       { name: 'Azul denim suave', hex: '#64748B' }
     ],
+    faceRecommendedColors: [
+      { name: 'Gris perla claro', hex: '#F1F5F9' },
+      { name: 'Malva empolvado', hex: '#C084FC' },
+      { name: 'Verde salvia apagado', hex: '#86EFAC' },
+      { name: 'Plata envejecida suave', hex: '#94A3B8' }
+    ],
     avoidColors: [
       { name: 'Naranja caldera', hex: '#EA580C' },
       { name: 'Mostaza ocre', hex: '#D97706' },
@@ -259,6 +330,12 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, { description: string; bestColors:
       { name: 'Azul acero', hex: '#64748B' },
       { name: 'Blanco lavanda', hex: '#E0E7FF' },
       { name: 'Azul marino suave', hex: '#1E40AF' }
+    ],
+    faceRecommendedColors: [
+      { name: 'Blanco lavanda', hex: '#EEF2FF' },
+      { name: 'Frambuesa frío', hex: '#BE185D' },
+      { name: 'Azul acero gélido', hex: '#38BDF8' },
+      { name: 'Plata pura', hex: '#CBD5E1' }
     ],
     avoidColors: [
       { name: 'Marrón teja', hex: '#B45309' },
@@ -1190,14 +1267,46 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
               </div>
             </div>
 
-            {/* Colors to avoid */}
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-neutral-500 block mb-2">
+            {/* Colors recommended near the face */}
+            <div className="bg-emerald-50/40 p-3.5 rounded-2xl border border-emerald-200/70 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
+                  Colores recomendados cerca del rostro:
+                </span>
+                <span className="text-[10px] text-emerald-800 font-semibold bg-emerald-100/70 px-2 py-0.5 rounded-full">
+                  Efecto buena cara
+                </span>
+              </div>
+              <p className="text-[11px] text-neutral-600 leading-relaxed">
+                Ideales para tops, camisas, bufandas, blazers, gafas y pendientes. Proyectan luz directa a tu piel:
+              </p>
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2 pt-1">
+                {currentSeasonData.faceRecommendedColors.map((color, i) => (
+                  <div key={i} className="text-center group" title={`${color.name} (${color.hex})`}>
+                    <div 
+                      className="h-9 sm:h-10 rounded-xl border border-emerald-300/80 shadow-2xs mb-1.5 transition-transform group-hover:scale-105" 
+                      style={{ backgroundColor: color.hex }} 
+                    />
+                    <span className="text-[9.5px] sm:text-[10.5px] text-neutral-800 font-medium block truncate leading-tight">
+                      {color.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Colors to avoid near face */}
+            <div className="bg-rose-50/30 p-3.5 rounded-2xl border border-rose-200/60 space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-rose-950 block">
                 Colores a evitar cerca del rostro:
               </span>
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+              <p className="text-[11px] text-neutral-600 leading-relaxed">
+                Pueden proyectar sombras o apagar el tono del cuello hacia arriba. Úsalos preferentemente en pantalones o faldas:
+              </p>
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-1">
                 {currentSeasonData.avoidColors.map((color, i) => (
-                  <div key={i} className="text-center opacity-85 group" title={`${color.name} (${color.hex})`}>
+                  <div key={i} className="text-center opacity-90 group" title={`${color.name} (${color.hex})`}>
                     <div 
                       className="h-7 sm:h-8 rounded-lg border border-black/10 mb-1 transition-transform group-hover:scale-105" 
                       style={{ backgroundColor: color.hex }} 
