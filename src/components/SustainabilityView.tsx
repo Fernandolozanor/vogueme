@@ -1,13 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TrendingUp, AlertCircle, Award } from 'lucide-react';
 import type { ClothingItem } from '../types';
+import { GarmentDetailModal } from './GarmentDetailModal';
+import { toggleFavoriteItem } from '../services/storage';
 
 interface SustainabilityViewProps {
   wardrobe: ClothingItem[];
   onSelectGarmentForLook?: (item: ClothingItem) => void;
+  onWardrobeChange?: (updated: ClothingItem[]) => void;
 }
 
-export const SustainabilityView: React.FC<SustainabilityViewProps> = ({ wardrobe }) => {
+export const SustainabilityView: React.FC<SustainabilityViewProps> = ({ 
+  wardrobe,
+  onWardrobeChange
+}) => {
+  const [selectedGarment, setSelectedGarment] = useState<{ item: ClothingItem; role?: string } | null>(null);
+
   // Calculations
   const totalItems = wardrobe.length;
   const totalWearCount = wardrobe.reduce((acc, i) => acc + (i.wearCount || 0), 0);
@@ -131,17 +139,22 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({ wardrobe
             {bestInvestments.map((item, idx) => (
               <div 
                 key={item.id}
-                className="bg-white p-3 sm:p-3.5 rounded-2xl border border-neutral-200/80 flex items-center justify-between gap-2.5 sm:gap-3 shadow-2xs min-w-0"
+                onClick={() => setSelectedGarment({
+                  item,
+                  role: `Top #${idx + 1} Más Amortizada (${item.cpw.toFixed(2)} € / uso)`
+                })}
+                className="bg-white p-3 sm:p-3.5 rounded-2xl border border-neutral-200/80 hover:border-neutral-400 hover:shadow-xs active:scale-[0.99] transition-all cursor-pointer flex items-center justify-between gap-2.5 sm:gap-3 shadow-2xs min-w-0 group"
+                title="Pulsa para ver ficha completa de la prenda"
               >
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#FAF8F5] overflow-hidden p-1 shrink-0 border border-neutral-100 flex items-center justify-center">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#FAF8F5] overflow-hidden p-1 shrink-0 border border-neutral-100 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="text-[9px] font-bold text-amber-700 uppercase tracking-wider block">
                       Top #{idx + 1} Rentabilidad
                     </span>
-                    <h3 className="text-xs font-semibold text-neutral-900 truncate">
+                    <h3 className="text-xs font-semibold text-neutral-900 truncate group-hover:text-amber-900 transition-colors">
                       {item.name}
                     </h3>
                     <span className="text-[10px] text-neutral-400 block truncate">
@@ -185,14 +198,19 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({ wardrobe
             {forgottenItems.map((item) => (
               <div 
                 key={item.id}
-                className="p-3 sm:p-3.5 rounded-2xl border border-neutral-200/80 bg-[#FAF8F5] flex items-center justify-between gap-2.5 sm:gap-3 min-w-0"
+                onClick={() => setSelectedGarment({
+                  item,
+                  role: item.wearCount === 0 ? 'Prenda sin estrenar' : 'Prenda con solo 1 puesta'
+                })}
+                className="p-3 sm:p-3.5 rounded-2xl border border-neutral-200/80 hover:border-neutral-400 hover:shadow-xs active:scale-[0.99] transition-all cursor-pointer bg-[#FAF8F5] flex items-center justify-between gap-2.5 sm:gap-3 min-w-0 group"
+                title="Pulsa para ver ficha completa de la prenda"
               >
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white overflow-hidden p-1 shrink-0 border border-neutral-200 flex items-center justify-center">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white overflow-hidden p-1 shrink-0 border border-neutral-200 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-xs font-semibold text-neutral-900 truncate">
+                    <h3 className="text-xs font-semibold text-neutral-900 truncate group-hover:text-rose-950 transition-colors">
                       {item.name}
                     </h3>
                     <span className="text-[10px] text-rose-900 font-medium block truncate">
@@ -221,6 +239,23 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({ wardrobe
         </div>
 
       </div>
+
+      {/* Modal Emergente con los Detalles Completos de la Prenda */}
+      <GarmentDetailModal
+        item={selectedGarment ? selectedGarment.item : null}
+        role={selectedGarment?.role}
+        onClose={() => setSelectedGarment(null)}
+        onToggleFavorite={(id) => {
+          const updated = toggleFavoriteItem(id);
+          onWardrobeChange?.(updated);
+          if (selectedGarment && selectedGarment.item.id === id) {
+            setSelectedGarment(prev => prev ? {
+              ...prev,
+              item: { ...prev.item, isFavorite: !prev.item.isFavorite }
+            } : null);
+          }
+        }}
+      />
     </div>
   );
 };

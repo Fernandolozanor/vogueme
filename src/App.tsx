@@ -77,6 +77,7 @@ export function App() {
         {activeTab === 'sustainability' && (
           <SustainabilityView 
             wardrobe={wardrobe} 
+            onWardrobeChange={setWardrobe}
           />
         )}
       </main>
