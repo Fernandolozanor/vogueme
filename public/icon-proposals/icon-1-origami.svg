@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Satin Charcoal Gradient -->
+    <linearGradient id="bgGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#221F1B"/>
+      <stop offset="50%" stop-color="#161412"/>
+      <stop offset="100%" stop-color="#0A0908"/>
+    </linearGradient>
+
+    <!-- Champagne Gold Gradients -->
+    <linearGradient id="goldLight1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF8"/>
+      <stop offset="35%" stop-color="#F2E3C6"/>
+      <stop offset="70%" stop-color="#D8BA8E"/>
+      <stop offset="100%" stop-color="#B8935E"/>
+    </linearGradient>
+
+    <linearGradient id="goldDark1" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#9C7945"/>
+      <stop offset="50%" stop-color="#CBB084"/>
+      <stop offset="100%" stop-color="#EEDCBE"/>
+    </linearGradient>
+
+    <!-- 3D Ribbon Drop Shadow -->
+    <filter id="ribbonShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+
+    <filter id="softGlow1" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- iOS Squircle Frame -->
+  <rect width="512" height="512" rx="120" fill="url(#bgGrad1)"/>
+  <rect x="10" y="10" width="492" height="492" rx="112" fill="none" stroke="url(#goldLight1)" stroke-width="2.5" stroke-opacity="0.3"/>
+
+  <!-- Monogram Ribbon V & M Origami Structure -->
+  <g filter="url(#ribbonShadow)" transform="translate(0, 8)">
+    <!-- Left outer wing of M (folds backwards) -->
+    <path d="M 116 350 L 116 195 C 116 150 155 135 190 160 L 225 188 L 195 230 L 165 205 C 158 200 154 205 154 220 L 154 350 Z" 
+          fill="url(#goldDark1)" />
+
+    <!-- Right outer wing of M (folds backwards) -->
+    <path d="M 396 350 L 396 195 C 396 150 357 135 322 160 L 287 188 L 317 230 L 347 205 C 354 200 358 205 358 220 L 358 350 Z" 
+          fill="url(#goldDark1)" />
+
+    <!-- Central V (folds forward prominently over the wings) -->
+    <!-- Left leg of V -->
+    <path d="M 190 160 L 256 370 L 232 370 L 160 185 Z" 
+          fill="url(#goldLight1)" />
+
+    <!-- Right leg of V -->
+    <path d="M 322 160 L 256 370 L 280 370 L 352 185 Z" 
+          fill="url(#goldLight1)" />
+
+    <!-- Top fold connection over V apex -->
+    <path d="M 188 158 C 215 178 240 200 256 220 C 272 200 297 178 324 158 L 305 138 C 285 155 268 175 256 190 C 244 175 227 155 207 138 Z"
+          fill="url(#goldLight1)" opacity="0.95" />
+
+    <!-- Micro atelier sparkle on the V neckline -->
+    <path d="M 256 360 Q 256 378 274 378 Q 256 378 256 396 Q 256 378 238 378 Q 256 378 256 360 Z" 
+          fill="#FFFDF8" filter="url(#softGlow1)"/>
+  </g>
+
+  <!-- Subtitle Label -->
+  <text x="256" y="445" font-family="'Playfair Display', serif" font-size="20" font-weight="600" fill="#E5D3B8" letter-spacing="8" text-anchor="middle" opacity="0.85">VOGUEME</text>
+  <text x="256" y="468" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="600" fill="#A89274" letter-spacing="4" text-anchor="middle">ATELIER ORIGAMI</text>
+</svg>

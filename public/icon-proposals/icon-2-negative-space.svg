@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background British Racing / Atelier Emerald Gradient -->
+    <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E2C20"/>
+      <stop offset="50%" stop-color="#071B13"/>
+      <stop offset="100%" stop-color="#030C08"/>
+    </linearGradient>
+
+    <!-- Diamond Facet Highlights -->
+    <linearGradient id="facetCream" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="40%" stop-color="#FBF7EE"/>
+      <stop offset="80%" stop-color="#EADBBE"/>
+      <stop offset="100%" stop-color="#C5B188"/>
+    </linearGradient>
+
+    <linearGradient id="facetGold" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ECCF9B"/>
+      <stop offset="50%" stop-color="#B89658"/>
+      <stop offset="100%" stop-color="#80622F"/>
+    </linearGradient>
+
+    <linearGradient id="rubyGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF5A70"/>
+      <stop offset="100%" stop-color="#8E1428"/>
+    </linearGradient>
+
+    <filter id="shadow2" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.7"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Frame -->
+  <rect width="512" height="512" rx="120" fill="url(#bgGrad2)"/>
+  <rect x="10" y="10" width="492" height="492" rx="112" fill="none" stroke="#255541" stroke-width="2"/>
+
+  <!-- Geometric Diamond Cut M with Inverted V Negative Space -->
+  <g filter="url(#shadow2)" transform="translate(0, -6)">
+    <!-- Left Column of M with angled bevels -->
+    <polygon points="120,360 120,165 178,165 178,360" fill="url(#facetCream)"/>
+    <polygon points="120,165 178,165 150,140" fill="#FFFFFF"/>
+
+    <!-- Right Column of M with angled bevels -->
+    <polygon points="334,360 334,165 392,165 392,360" fill="url(#facetCream)"/>
+    <polygon points="334,165 392,165 362,140" fill="#FFFFFF"/>
+
+    <!-- Center Chevron Down (Creates the M valleys & silhouettes the V in negative space) -->
+    <!-- Left diagonal arm -->
+    <polygon points="178,165 256,290 236,306 178,212" fill="url(#facetGold)"/>
+    <!-- Right diagonal arm -->
+    <polygon points="334,165 256,290 276,306 334,212" fill="url(#facetGold)"/>
+
+    <!-- Brilliant Inverted Negative Space V Glowing in Center Core -->
+    <polygon points="256,260 216,165 296,165" fill="#071B13" stroke="#255541" stroke-width="1.5"/>
+
+    <!-- Floating Emerald/Ruby Jewel Heart inside the V -->
+    <polygon points="256,190 270,210 256,230 242,210" fill="url(#rubyGlow)"/>
+    <circle cx="256" cy="210" r="3" fill="#FFFFFF"/>
+
+    <!-- Bottom anchoring facet -->
+    <polygon points="236,306 256,290 276,306 256,360" fill="url(#facetCream)"/>
+  </g>
+
+  <!-- Label -->
+  <text x="256" y="445" font-family="'Playfair Display', serif" font-size="20" font-weight="600" fill="#EADBBE" letter-spacing="8" text-anchor="middle" opacity="0.85">VOGUEME</text>
+  <text x="256" y="468" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="600" fill="#5A9E7F" letter-spacing="4" text-anchor="middle">NEGATIVE SPACE DIAMOND</text>
+</svg>
