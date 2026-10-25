@@ -63,6 +63,7 @@ export function App() {
             profile={profile} 
             wardrobe={wardrobe}
             onProfileUpdate={handleProfileUpdate} 
+            onNavigate={(tab) => setActiveTab(tab)}
           />
         )}
 
