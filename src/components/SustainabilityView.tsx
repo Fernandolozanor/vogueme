@@ -11,8 +11,6 @@ interface SustainabilityViewProps {
   onOpenCalendar?: () => void;
 }
 
-type MetricCardSection = 'investments' | 'forgotten';
-
 export const SustainabilityView: React.FC<SustainabilityViewProps> = ({ 
   wardrobe,
   onWardrobeChange,
@@ -20,12 +18,9 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
 }) => {
   const [selectedGarment, setSelectedGarment] = useState<{ item: ClothingItem; role?: string } | null>(null);
 
-  // Control de tarjetas plegadas en móvil: plegadas por defecto para que quepan en una sola pantalla
-  const [expandedMobileCard, setExpandedMobileCard] = useState<MetricCardSection | null>(null);
-
-  const toggleCard = (card: MetricCardSection) => {
-    setExpandedMobileCard(prev => prev === card ? null : card);
-  };
+  // En móvil, las dos tarjetas principales aparecen desplegadas por defecto
+  const [isInvestmentsOpen, setIsInvestmentsOpen] = useState(true);
+  const [isForgottenOpen, setIsForgottenOpen] = useState(true);
 
   // Calculations
   const totalItems = wardrobe.length;
@@ -147,7 +142,7 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
         {/* Card 1: Top Investments (Lowest CPW) */}
         <div className="bg-[#FAF8F5] border border-[#E2DBD0] rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm space-y-2.5 sm:space-y-4 min-w-0 overflow-hidden transition-all">
           <div 
-            onClick={() => toggleCard('investments')}
+            onClick={() => setIsInvestmentsOpen(prev => !prev)}
             className="flex items-center justify-between border-b border-neutral-200/80 pb-2 sm:pb-3 cursor-pointer select-none lg:cursor-default"
           >
             <div className="min-w-0 flex-1">
@@ -170,8 +165,8 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
 
               {/* Toggle en móvil */}
               <div className="lg:hidden flex items-center gap-1 text-xs font-semibold text-emerald-900">
-                <span>{expandedMobileCard === 'investments' ? 'Plegar' : 'Ver'}</span>
-                {expandedMobileCard === 'investments' ? (
+                <span>{isInvestmentsOpen ? 'Plegar' : 'Ver'}</span>
+                {isInvestmentsOpen ? (
                   <ChevronUp className="w-4 h-4 text-emerald-800" />
                 ) : (
                   <ChevronDown className="w-4 h-4 text-neutral-400" />
@@ -180,8 +175,8 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
             </div>
           </div>
 
-          {/* Contenido (desplegable en móvil, siempre abierto en desktop) */}
-          <div className={`space-y-2.5 sm:space-y-3 ${expandedMobileCard === 'investments' ? 'block' : 'hidden lg:block'}`}>
+          {/* Contenido (desplegado por defecto en móvil, siempre abierto en desktop) */}
+          <div className={`space-y-2.5 sm:space-y-3 ${isInvestmentsOpen ? 'block' : 'hidden lg:block'}`}>
             {bestInvestments.map((item, idx) => (
               <div 
                 key={item.id}
@@ -225,7 +220,7 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
         {/* Card 2: Forgotten Items (Rescue Wardrobe) */}
         <div className="bg-white/90 border border-[#E5DFD5] rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm space-y-2.5 sm:space-y-4 min-w-0 overflow-hidden transition-all">
           <div 
-            onClick={() => toggleCard('forgotten')}
+            onClick={() => setIsForgottenOpen(prev => !prev)}
             className="flex items-center justify-between border-b border-neutral-200/80 pb-2 sm:pb-3 cursor-pointer select-none lg:cursor-default"
           >
             <div className="min-w-0 flex-1">
@@ -248,8 +243,8 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
 
               {/* Toggle en móvil */}
               <div className="lg:hidden flex items-center gap-1 text-xs font-semibold text-rose-900">
-                <span>{expandedMobileCard === 'forgotten' ? 'Plegar' : 'Ver'}</span>
-                {expandedMobileCard === 'forgotten' ? (
+                <span>{isForgottenOpen ? 'Plegar' : 'Ver'}</span>
+                {isForgottenOpen ? (
                   <ChevronUp className="w-4 h-4 text-rose-800" />
                 ) : (
                   <ChevronDown className="w-4 h-4 text-neutral-400" />
@@ -258,8 +253,8 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
             </div>
           </div>
 
-          {/* Contenido (desplegable en móvil, siempre abierto en desktop) */}
-          <div className={`space-y-2.5 sm:space-y-3 ${expandedMobileCard === 'forgotten' ? 'block' : 'hidden lg:block'}`}>
+          {/* Contenido (desplegado por defecto en móvil, siempre abierto en desktop) */}
+          <div className={`space-y-2.5 sm:space-y-3 ${isForgottenOpen ? 'block' : 'hidden lg:block'}`}>
             <p className="text-xs text-neutral-600 leading-relaxed">
               Prendas con 0 o 1 sola puesta. Tu estilista IA puede priorizarlas en el look de mañana para rentabilizar tu armario.
             </p>
