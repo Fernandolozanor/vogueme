@@ -549,10 +549,10 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                                 <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
                               </div>
                               <div className="min-w-0">
-                                <h5 className="text-xs font-semibold text-neutral-900 truncate group-hover:text-rose-950">
+                                <h5 className="text-xs font-semibold text-neutral-900 leading-snug break-words group-hover:text-rose-950">
                                   {item.name}
                                 </h5>
-                                <span className="text-[10px] text-neutral-400 capitalize block truncate">
+                                <span className="text-[10px] text-neutral-400 capitalize block break-words">
                                   {item.category} • {item.colorName}
                                 </span>
                               </div>
@@ -734,7 +734,7 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                         <span className="text-[9px] font-bold text-amber-700 uppercase tracking-wider block">
                           #{idx + 1} Más puesta
                         </span>
-                        <h5 className="text-xs font-semibold text-neutral-900 truncate">
+                        <h5 className="text-xs font-semibold text-neutral-900 leading-snug break-words">
                           {entry.item.name}
                         </h5>
                         <div className="flex items-center gap-1.5 mt-0.5">
@@ -775,7 +775,7 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                           <span className="text-[10px] font-bold text-neutral-400 block uppercase">
                             {new Date(log.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
                           </span>
-                          <h5 className="text-xs font-semibold text-neutral-900 truncate">
+                          <h5 className="text-xs font-semibold text-neutral-900 leading-snug break-words">
                             {log.occasion || 'Look diario'}
                           </h5>
                           <div className="flex items-center -space-x-1.5 pt-1.5">

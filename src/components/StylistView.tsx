@@ -506,14 +506,14 @@ export const StylistView: React.FC<StylistViewProps> = ({
 
         {/* Ficha descriptiva debajo */}
         <div className="mt-1.5 text-left shrink-0 min-w-0 w-full space-y-0.5">
-          <span className="text-[8px] sm:text-[8.5px] uppercase font-bold text-neutral-400 block truncate tracking-wider">
+          <span className="text-[8px] sm:text-[8.5px] uppercase font-bold text-neutral-400 block tracking-wider">
             {role}
           </span>
-          <p className="text-[11px] sm:text-xs font-semibold text-neutral-900 truncate" title={item.name}>
+          <p className="text-[11px] sm:text-xs font-semibold text-neutral-900 leading-snug break-words" title={item.name}>
             {item.name}
           </p>
           <div className="flex items-center justify-between text-[10px] text-neutral-400 gap-1 min-w-0">
-            <span className="truncate flex-1 min-w-0">{item.brand || 'Básico'}</span>
+            <span className="break-words flex-1 min-w-0">{item.brand || 'Básico'}</span>
             <span className="font-medium text-emerald-800 shrink-0 whitespace-nowrap">{item.wearCount} puestas</span>
           </div>
         </div>
@@ -812,7 +812,7 @@ export const StylistView: React.FC<StylistViewProps> = ({
                   {query.activity} ({query.location})
                 </span>
               </div>
-              <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 truncate leading-tight mt-0.5" title={recommendation.title}>
+              <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 leading-snug break-words mt-0.5" title={recommendation.title}>
                 {recommendation.title}
               </h2>
             </div>

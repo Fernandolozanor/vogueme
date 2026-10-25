@@ -143,7 +143,7 @@ export const ShoppingGapsView: React.FC<ShoppingGapsViewProps> = ({
               <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
                 1. Prendas Faltantes
               </span>
-              <h4 className="text-xs font-bold text-neutral-900 truncate">
+              <h4 className="text-xs font-bold text-neutral-900 break-words">
                 {wardrobe.length} prendas registradas
               </h4>
               <p className="text-[11px] text-neutral-500 mt-0.5 leading-snug hidden md:block">
@@ -174,7 +174,7 @@ export const ShoppingGapsView: React.FC<ShoppingGapsViewProps> = ({
               <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
                 2. Tus Medidas & Silueta
               </span>
-              <h4 className="text-xs font-bold text-neutral-900 capitalize truncate">
+              <h4 className="text-xs font-bold text-neutral-900 capitalize break-words">
                 Silueta {(profile.bodyShape || 'reloj_de_arena').replace('_', ' ')} • {profile.heightCm || 167} cm
               </h4>
               <p className="text-[11px] text-neutral-500 mt-0.5 leading-snug hidden md:block">
@@ -205,7 +205,7 @@ export const ShoppingGapsView: React.FC<ShoppingGapsViewProps> = ({
               <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
                 3. Análisis Facial & Visagismo
               </span>
-              <h4 className="text-xs font-bold text-neutral-900 capitalize truncate">
+              <h4 className="text-xs font-bold text-neutral-900 capitalize break-words">
                 Rostro {profile.faceShape || 'ovalada'} • {profile.colorSeason || 'Otoño Suave'}
               </h4>
               <p className="text-[11px] text-neutral-500 mt-0.5 leading-snug hidden md:block">
@@ -235,7 +235,7 @@ export const ShoppingGapsView: React.FC<ShoppingGapsViewProps> = ({
               <Store className="w-4 h-4" />
             </span>
             <div className="min-w-0">
-              <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 truncate">
+              <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 leading-snug break-words">
                 Tus Tiendas de Moda Habituales
               </h2>
               <p className="text-[11px] text-neutral-500 truncate hidden sm:block">
@@ -264,7 +264,7 @@ export const ShoppingGapsView: React.FC<ShoppingGapsViewProps> = ({
             onClick={() => setIsMobileStoresOpen(true)}
             className="sm:hidden flex items-center justify-between text-xs text-neutral-600 bg-[#FAF8F5] p-2.5 rounded-xl border border-neutral-200 cursor-pointer active:bg-[#F3EFE8] transition-colors"
           >
-            <span className="truncate max-w-[220px] text-[11px]">
+            <span className="break-words text-[11px] flex-1 mr-2">
               Activas: <strong>{favoriteStores.slice(0, 3).join(', ')}{favoriteStores.length > 3 ? ` +${favoriteStores.length - 3}` : ''}</strong>
             </span>
             <span className="text-[10px] font-bold text-rose-900 shrink-0 flex items-center gap-1">

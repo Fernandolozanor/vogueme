@@ -836,8 +836,8 @@ export const LuggageView: React.FC<LuggageViewProps> = ({ wardrobe, profile }) =
                   </div>
 
                   {/* Motivo de estilismo inteligente para el viaje */}
-                  <div className="pt-2 border-t border-neutral-100/80 flex items-center justify-between gap-2">
-                    <p className="text-[10.5px] text-neutral-500 italic leading-snug truncate flex-1">
+                  <div className="pt-2 border-t border-neutral-100/80 flex items-start justify-between gap-2">
+                    <p className="text-[10.5px] text-neutral-500 italic leading-snug break-words flex-1">
                       💡 {roleReason}
                     </p>
 
@@ -902,7 +902,7 @@ export const LuggageView: React.FC<LuggageViewProps> = ({ wardrobe, profile }) =
                         </div>
                         <div className="min-w-0">
                           <span className="text-[9px] uppercase font-bold text-neutral-400 block">{garment.category}</span>
-                          <span className="text-xs font-semibold text-neutral-800 truncate block">{garment.name}</span>
+                          <span className="text-xs font-semibold text-neutral-800 break-words block leading-snug">{garment.name}</span>
                           <span className="text-[10px] text-neutral-400">{garment.colorName}</span>
                         </div>
                       </div>

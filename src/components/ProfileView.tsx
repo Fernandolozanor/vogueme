@@ -536,16 +536,16 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
           onClick={() => toggleMobileSection('identity')}
           className="flex items-center justify-between border-b border-neutral-100 pb-3 cursor-pointer select-none lg:cursor-default"
         >
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div className="w-9 h-9 rounded-full bg-rose-50 flex items-center justify-center text-rose-900 shrink-0">
               <User className="w-5 h-5" />
             </div>
-            <div className="min-w-0">
-              <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 truncate">
+            <div className="min-w-0 flex-1">
+              <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 leading-snug break-words">
                 Datos Personales & Identidad
               </h2>
               {/* Resumen Móvil */}
-              <p className="text-xs text-rose-950/80 font-medium truncate block lg:hidden">
+              <p className="text-xs text-rose-950/80 font-medium leading-relaxed break-words block lg:hidden mt-0.5">
                 {currentProfile.name || 'Tu nombre'} • {currentProfile.age ? currentProfile.age + ' años' : 'Edad no definida'} • {currentProfile.city || 'Ciudad no definida'}
               </p>
               <p className="text-xs text-neutral-500 hidden lg:block">
@@ -655,12 +655,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-rose-900 shrink-0" />
-                  <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 truncate">
+                  <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 leading-snug break-words">
                     Análisis Facial & Visagismo
                   </h2>
                 </div>
                 {/* Resumen Móvil */}
-                <p className="text-xs text-rose-950/80 font-medium truncate mt-0.5 block lg:hidden">
+                <p className="text-xs text-rose-950/80 font-medium leading-relaxed break-words mt-1 block lg:hidden">
                   Rostro {FACE_SHAPES_CONFIG[activeFaceShape]?.label || 'Ovalada'} • Contraste {currentProfile.facialContrast || 'medio'} • Piel {currentProfile.skinTone} ({currentProfile.skinUndertone})
                 </p>
                 <p className="text-xs text-neutral-500 mt-0.5 hidden lg:block">
@@ -1133,12 +1133,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
               className="flex items-center justify-between border-b border-neutral-200 pb-3 cursor-pointer select-none lg:cursor-default"
             >
               <div className="min-w-0 flex-1">
-                <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 flex items-center gap-2 truncate">
+                <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 flex items-center gap-2 leading-snug break-words">
                   <Ruler className="w-5 h-5 text-rose-900 shrink-0" />
                   Morfología & Medidas
                 </h2>
                 {/* Resumen Móvil */}
-                <p className="text-xs text-rose-950/80 font-medium truncate mt-0.5 block lg:hidden">
+                <p className="text-xs text-rose-950/80 font-medium leading-relaxed break-words mt-1 block lg:hidden">
                   {BODY_SHAPES_INFO[currentProfile.bodyShape]?.label || 'Reloj de Arena'} • {currentProfile.heightCm || 165} cm • ({currentProfile.chestCm || 88}-{currentProfile.waistCm || 65}-{currentProfile.hipsCm || 94} cm)
                 </p>
               </div>
@@ -1261,11 +1261,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
               className="flex items-center justify-between border-b border-neutral-100 pb-3 cursor-pointer select-none lg:cursor-default"
             >
               <div className="min-w-0 flex-1">
-                <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 truncate">
+                <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 leading-snug break-words">
                   Estilos & Vibes Predilectos
                 </h2>
                 {/* Resumen Móvil */}
-                <p className="text-xs text-rose-950/80 font-medium truncate mt-0.5 block lg:hidden">
+                <p className="text-xs text-rose-950/80 font-medium leading-relaxed break-words mt-1 block lg:hidden">
                   {currentProfile.preferredStyles.length > 0 
                     ? currentProfile.preferredStyles.map(s => '#' + s).join(', ') 
                     : 'Ningún estilo seleccionado'}
@@ -1315,35 +1315,35 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
               className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-neutral-200 pb-3 cursor-pointer select-none lg:cursor-default"
             >
               <div className="flex items-center justify-between w-full lg:w-auto">
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <Palette className="w-5 h-5 text-rose-900 shrink-0" />
-                    <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 truncate">
+                    <h2 className="font-serif text-base sm:text-xl font-bold text-neutral-900 leading-snug break-words">
                       Tu Estación Cromática
                     </h2>
                   </div>
                   {/* Resumen Móvil */}
-                  <p className="text-xs text-rose-950/80 font-medium truncate mt-0.5 block lg:hidden">
+                  <p className="text-xs text-rose-950/80 font-medium leading-relaxed break-words mt-1 block lg:hidden">
                     Paleta {currentProfile.colorSeason}
                   </p>
                 </div>
 
                 {/* Mobile action buttons & chevron */}
-                <div className="lg:hidden flex items-center gap-2 shrink-0 ml-2">
+                <div className="lg:hidden flex items-center gap-1.5 shrink-0 ml-2">
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsColorSeasonModalOpen(true);
                     }}
-                    className="px-2 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-950 border border-rose-200/90 text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+                    className="px-2 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-950 border border-rose-200/90 text-[11px] font-semibold flex items-center gap-1 cursor-pointer shrink-0"
                     title="Ver explicación completa de cómo funciona la colorimetría"
                   >
-                    <HelpCircle className="w-3 h-3 text-rose-900" />
+                    <HelpCircle className="w-3.5 h-3.5 text-rose-900" />
                     <span>Ayuda</span>
                   </button>
 
-                  <div className="flex items-center gap-1 text-xs font-semibold text-rose-900">
+                  <div className="flex items-center gap-0.5 text-xs font-semibold text-rose-900 shrink-0">
                     <span>{expandedMobileSection === 'colorSeason' ? 'Plegar' : 'Ajustar'}</span>
                     {expandedMobileSection === 'colorSeason' ? (
                       <ChevronUp className="w-4 h-4 text-rose-900" />
@@ -1423,7 +1423,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                       className="h-10 sm:h-12 rounded-xl border border-black/10 shadow-2xs mb-1.5 transition-transform group-hover:scale-105" 
                       style={{ backgroundColor: color.hex }} 
                     />
-                    <span className="text-[9.5px] sm:text-[10.5px] text-neutral-800 font-medium block truncate leading-tight">
+                    <span className="text-[9.5px] sm:text-[10.5px] text-neutral-800 font-medium block break-words leading-tight">
                       {color.name}
                     </span>
                   </div>
@@ -1452,7 +1452,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                       className="h-9 sm:h-10 rounded-xl border border-emerald-300/80 shadow-2xs mb-1.5 transition-transform group-hover:scale-105" 
                       style={{ backgroundColor: color.hex }} 
                     />
-                    <span className="text-[9.5px] sm:text-[10.5px] text-neutral-800 font-medium block truncate leading-tight">
+                    <span className="text-[9.5px] sm:text-[10.5px] text-neutral-800 font-medium block break-words leading-tight">
                       {color.name}
                     </span>
                   </div>
@@ -1475,7 +1475,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                       className="h-7 sm:h-8 rounded-lg border border-black/10 mb-1 transition-transform group-hover:scale-105" 
                       style={{ backgroundColor: color.hex }} 
                     />
-                    <span className="text-[9.5px] sm:text-[10.5px] text-neutral-600 font-medium block truncate leading-tight">
+                    <span className="text-[9.5px] sm:text-[10.5px] text-neutral-600 font-medium block break-words leading-tight">
                       {color.name}
                     </span>
                   </div>

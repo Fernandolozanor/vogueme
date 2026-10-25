@@ -148,12 +148,12 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <Award className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 shrink-0" />
-                <h2 className="font-serif text-sm sm:text-xl font-bold text-neutral-900 truncate">
+                <h2 className="font-serif text-sm sm:text-xl font-bold text-neutral-900 leading-snug break-words">
                   Tus Joyas Más Amortizadas
                 </h2>
               </div>
               {/* Resumen Móvil */}
-              <p className="text-[10.5px] text-neutral-500 truncate mt-0.5 block lg:hidden">
+              <p className="text-[10.5px] text-neutral-500 leading-snug break-words mt-0.5 block lg:hidden">
                 Top {bestInvestments.length} piezas • Desde {bestInvestments[0]?.cpw ? `${bestInvestments[0].cpw.toFixed(2)} €/uso` : 'rentables'}
               </p>
             </div>
@@ -195,10 +195,10 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
                     <span className="text-[9px] font-bold text-amber-700 uppercase tracking-wider block">
                       Top #{idx + 1} Rentabilidad
                     </span>
-                    <h3 className="text-xs font-semibold text-neutral-900 truncate group-hover:text-amber-900 transition-colors">
+                    <h3 className="text-xs font-semibold text-neutral-900 leading-snug break-words group-hover:text-amber-900 transition-colors">
                       {item.name}
                     </h3>
-                    <span className="text-[10px] text-neutral-400 block truncate">
+                    <span className="text-[10px] text-neutral-400 block break-words">
                       {item.wearCount} puestas registradas
                     </span>
                   </div>
@@ -226,12 +226,12 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-rose-800 shrink-0" />
-                <h2 className="font-serif text-sm sm:text-xl font-bold text-neutral-900 truncate">
+                <h2 className="font-serif text-sm sm:text-xl font-bold text-neutral-900 leading-snug break-words">
                   Prendas Olvidadas en el Fondo
                 </h2>
               </div>
               {/* Resumen Móvil */}
-              <p className="text-[10.5px] text-neutral-500 truncate mt-0.5 block lg:hidden">
+              <p className="text-[10.5px] text-neutral-500 leading-snug break-words mt-0.5 block lg:hidden">
                 {forgottenItems.length} prendas con 0-1 puestas registradas
               </p>
             </div>
@@ -274,10 +274,10 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
                     <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-xs font-semibold text-neutral-900 truncate group-hover:text-rose-950 transition-colors">
+                    <h3 className="text-xs font-semibold text-neutral-900 leading-snug break-words group-hover:text-rose-950 transition-colors">
                       {item.name}
                     </h3>
-                    <span className="text-[10px] text-rose-900 font-medium block truncate">
+                    <span className="text-[10px] text-rose-900 font-medium block break-words">
                       {item.wearCount === 0 ? 'Sin estrenar todavía' : 'Solo 1 puesta'}
                     </span>
                   </div>
