@@ -54,6 +54,13 @@ export const addClothingItem = (item: ClothingItem): ClothingItem[] => {
   return updated;
 };
 
+export const updateClothingItem = (item: ClothingItem): ClothingItem[] => {
+  const current = getStoredClothes();
+  const updated = current.map(c => c.id === item.id ? item : c);
+  saveClothes(updated);
+  return updated;
+};
+
 export const deleteClothingItem = (id: string): ClothingItem[] => {
   const current = getStoredClothes();
   const updated = current.filter(item => item.id !== id);

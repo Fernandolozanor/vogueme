@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Heart } from 'lucide-react';
+import { X, Heart, Pencil } from 'lucide-react';
 import type { ClothingItem } from '../types';
 
 interface GarmentDetailModalProps {
@@ -8,13 +8,15 @@ interface GarmentDetailModalProps {
   role?: string;
   onClose: () => void;
   onToggleFavorite?: (id: string) => void;
+  onEdit?: (item: ClothingItem) => void;
 }
 
 export const GarmentDetailModal: React.FC<GarmentDetailModalProps> = ({
   item,
   role,
   onClose,
-  onToggleFavorite
+  onToggleFavorite,
+  onEdit
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -61,13 +63,29 @@ export const GarmentDetailModal: React.FC<GarmentDetailModalProps> = ({
             </h2>
           </div>
 
-          <button
-            onClick={onClose}
-            className="text-neutral-400 hover:text-neutral-900 p-2 rounded-full hover:bg-neutral-200/50 transition-colors cursor-pointer shrink-0"
-            title="Cerrar (Esc)"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {onEdit && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onEdit(item);
+                }}
+                className="px-3 py-1.5 rounded-xl border border-neutral-300 bg-white hover:bg-neutral-900 hover:text-white text-neutral-800 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                title="Editar características de la prenda"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Editar</span>
+              </button>
+            )}
+
+            <button
+              onClick={onClose}
+              className="text-neutral-400 hover:text-neutral-900 p-2 rounded-full hover:bg-neutral-200/50 transition-colors cursor-pointer shrink-0"
+              title="Cerrar (Esc)"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Body: Large Image & Detailed Specifications */}
@@ -165,7 +183,20 @@ export const GarmentDetailModal: React.FC<GarmentDetailModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-3 sm:p-4 border-t border-[#E8E1D5] bg-white/60 shrink-0 flex items-center justify-end gap-2">
+        <div className="p-3 sm:p-4 border-t border-[#E8E1D5] bg-white/60 shrink-0 flex items-center justify-between gap-2">
+          {onEdit ? (
+            <button
+              onClick={() => {
+                onClose();
+                onEdit(item);
+              }}
+              className="py-2.5 px-4 rounded-xl border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 font-semibold text-xs transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+            >
+              <Pencil className="w-3.5 h-3.5 text-rose-900" />
+              <span>Editar Prenda</span>
+            </button>
+          ) : <div />}
+
           <button
             onClick={onClose}
             className="w-full sm:w-auto py-2.5 px-6 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs transition-colors cursor-pointer shadow-xs text-center"

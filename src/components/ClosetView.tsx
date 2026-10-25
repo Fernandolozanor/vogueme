@@ -13,13 +13,15 @@ import {
   Image as ImageIcon,
   ZoomIn,
   Wand2,
-  Sliders
+  Sliders,
+  Pencil
 } from 'lucide-react';
-import type { ClothingItem, Category, StyleTag } from '../types';
+import type { ClothingItem, Category, StyleTag, Season } from '../types';
 import { INITIAL_CLOTHES } from '../data/initialData';
 import { processGarmentImage, applyCustomCutout } from '../services/imageProcessing';
 import { 
   addClothingItem, 
+  updateClothingItem,
   deleteClothingItem, 
   toggleFavoriteItem,
   removeSampleClothes,
@@ -68,7 +70,8 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedDetailItem, setSelectedDetailItem] = useState<ClothingItem | null>(null);
 
-  // Add Item Modal Form States
+  // Edit / Add Item Modal Form States
+  const [editingItem, setEditingItem] = useState<ClothingItem | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isReProcessing, setIsReProcessing] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -80,12 +83,61 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
   const [isMagicWandActive, setIsMagicWandActive] = useState<boolean>(false);
   const [itemName, setItemName] = useState('');
   const [itemCategory, setItemCategory] = useState<Category>('top');
+  const [itemSubCategory, setItemSubCategory] = useState<string>('');
   const [itemColorName, setItemColorName] = useState('Blanco roto');
   const [itemColorHex, setItemColorHex] = useState('#F6F5F2');
   const [itemBrand, setItemBrand] = useState('Zara');
   const [itemPrice, setItemPrice] = useState<string>('29.99');
+  const [itemWearCount, setItemWearCount] = useState<number>(0);
+  const [itemSeasons, setItemSeasons] = useState<Season[]>(['todas']);
+  const [itemStyles, setItemStyles] = useState<StyleTag[]>(['casual', 'chic']);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const toggleItemSeason = (season: Season) => {
+    if (season === 'todas') {
+      setItemSeasons(['todas']);
+      return;
+    }
+    const withoutAll = itemSeasons.filter(s => s !== 'todas');
+    const exists = withoutAll.includes(season);
+    const updated = exists ? withoutAll.filter(s => s !== season) : [...withoutAll, season];
+    setItemSeasons(updated.length === 0 ? ['todas'] : updated);
+  };
+
+  const toggleItemStyle = (style: StyleTag) => {
+    const exists = itemStyles.includes(style);
+    const updated = exists ? itemStyles.filter(s => s !== style) : [...itemStyles, style];
+    setItemStyles(updated.length === 0 ? ['casual'] : updated);
+  };
+
+  const handleStartAdd = () => {
+    setEditingItem(null);
+    resetForm();
+    setIsAddModalOpen(true);
+  };
+
+  const handleStartEdit = (item: ClothingItem) => {
+    setEditingItem(item);
+    setItemName(item.name);
+    setItemCategory(item.category);
+    setItemSubCategory(item.subCategory || '');
+    setItemColorName(item.colorName);
+    setItemColorHex(item.colorHex);
+    setItemBrand(item.brand || 'Básico');
+    setItemPrice(item.purchasePrice !== undefined ? item.purchasePrice.toString() : '');
+    setItemWearCount(item.wearCount || 0);
+    setItemSeasons(item.seasons && item.seasons.length > 0 ? item.seasons : ['todas']);
+    setItemStyles(item.styles && item.styles.length > 0 ? item.styles : ['casual', 'chic']);
+    setPreviewImage(item.imageUrl);
+    setOriginalImage(null);
+    setCutoutImage(item.imageUrl);
+    setWhiteStudioImage(null);
+    setActiveBackgroundMode('transparent');
+    setCutoutSensitivity(48);
+    setIsMagicWandActive(false);
+    setIsAddModalOpen(true);
+  };
 
   // Filtering
   const filteredClothes = wardrobe.filter((item) => {
@@ -124,6 +176,7 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
       console.error(err);
     } finally {
       setIsProcessing(false);
+      if (e.target) e.target.value = '';
     }
   };
 
@@ -188,18 +241,42 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
   const handleSaveItem = () => {
     if (!previewImage) return;
 
+    if (editingItem) {
+      const updatedItem: ClothingItem = {
+        ...editingItem,
+        name: itemName.trim() || `${itemCategory} ${itemColorName}`,
+        category: itemCategory,
+        subCategory: itemSubCategory.trim() || undefined,
+        colorName: itemColorName,
+        colorHex: itemColorHex,
+        brand: itemBrand.trim() || 'Básico',
+        purchasePrice: itemPrice ? parseFloat(itemPrice) : undefined,
+        wearCount: Math.max(0, parseInt(itemWearCount.toString()) || 0),
+        seasons: itemSeasons.length > 0 ? itemSeasons : ['todas'],
+        styles: itemStyles.length > 0 ? itemStyles : ['casual'],
+        imageUrl: previewImage || editingItem.imageUrl
+      };
+
+      const updated = updateClothingItem(updatedItem);
+      onWardrobeChange(updated);
+      setIsAddModalOpen(false);
+      resetForm();
+      return;
+    }
+
     const newItem: ClothingItem = {
       id: 'custom-' + Date.now(),
-      name: itemName || 'Prenda sin título',
+      name: itemName.trim() || `${itemCategory} ${itemColorName}`,
       category: itemCategory,
+      subCategory: itemSubCategory.trim() || undefined,
       colorName: itemColorName,
       colorHex: itemColorHex,
-      brand: itemBrand || 'Zara',
-      purchasePrice: parseFloat(itemPrice) || 29.99,
-      seasons: ['todas'],
-      styles: ['casual', 'chic'],
+      brand: itemBrand.trim() || 'Básico',
+      purchasePrice: itemPrice ? parseFloat(itemPrice) : undefined,
+      seasons: itemSeasons.length > 0 ? itemSeasons : ['todas'],
+      styles: itemStyles.length > 0 ? itemStyles : ['casual', 'chic'],
       imageUrl: previewImage,
-      wearCount: 0,
+      wearCount: Math.max(0, parseInt(itemWearCount.toString()) || 0),
       dateAdded: new Date().toISOString().split('T')[0],
       isFavorite: false
     };
@@ -211,6 +288,7 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
   };
 
   const resetForm = () => {
+    setEditingItem(null);
     setPreviewImage(null);
     setOriginalImage(null);
     setCutoutImage(null);
@@ -219,8 +297,15 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
     setCutoutSensitivity(48);
     setIsMagicWandActive(false);
     setItemName('');
+    setItemCategory('top');
+    setItemSubCategory('');
+    setItemColorName('Blanco roto');
+    setItemColorHex('#F6F5F2');
     setItemBrand('Zara');
     setItemPrice('29.99');
+    setItemWearCount(0);
+    setItemSeasons(['todas']);
+    setItemStyles(['casual', 'chic']);
   };
 
   const handleDelete = (id: string) => {
@@ -289,7 +374,7 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
           )}
 
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={handleStartAdd}
             className="inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-2xl bg-neutral-900 text-white font-medium text-xs sm:text-sm hover:bg-neutral-800 transition-all shadow-md cursor-pointer active:scale-98"
           >
             <Plus className="w-4 h-4" />
@@ -406,13 +491,29 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
                       {costPerWear ? `${costPerWear}€ / puesta` : 'Sin estrenar'}
                     </span>
 
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className="text-neutral-300 hover:text-rose-700 transition-colors p-1 cursor-pointer"
-                      title="Eliminar prenda"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStartEdit(item);
+                        }}
+                        className="text-neutral-400 hover:text-neutral-900 transition-colors p-1.5 cursor-pointer rounded-lg hover:bg-neutral-100"
+                        title="Editar prenda"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(item.id);
+                        }}
+                        className="text-neutral-300 hover:text-rose-700 transition-colors p-1.5 cursor-pointer rounded-lg hover:bg-rose-50"
+                        title="Eliminar prenda"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -467,15 +568,20 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
                   100% On-Device Processing
                 </span>
                 <h2 className="font-serif text-xl sm:text-2xl font-bold text-neutral-900 mt-0.5">
-                  Digitalizar Prenda
+                  {editingItem ? 'Editar Prenda' : 'Digitalizar Prenda'}
                 </h2>
                 <p className="text-[11px] sm:text-xs text-neutral-500">
-                  Sube la foto de tu ropa. La IA recortará el fondo y extraerá su color en tu propio dispositivo.
+                  {editingItem 
+                    ? 'Modifica los datos, nombre, categoría, color, puestas o foto de tu prenda.' 
+                    : 'Sube la foto de tu ropa. La IA recortará el fondo y extraerá su color en tu propio dispositivo.'}
                 </p>
               </div>
 
               <button
-                onClick={() => setIsAddModalOpen(false)}
+                onClick={() => {
+                  setIsAddModalOpen(false);
+                  setEditingItem(null);
+                }}
                 className="text-neutral-400 hover:text-neutral-800 p-1.5 rounded-full hover:bg-neutral-200/50 transition-colors cursor-pointer shrink-0 ml-2"
                 title="Cerrar"
               >
@@ -596,6 +702,17 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
                       </div>
                     )}
 
+                    {/* Indicador superior si está procesando una nueva foto */}
+                    {isProcessing && (
+                      <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-amber-50/90 border border-amber-200/90 text-amber-950 text-xs shadow-2xs animate-pulse">
+                        <Sparkles className="w-4 h-4 animate-spin text-amber-600 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold truncate">Procesando nueva foto de la prenda...</p>
+                          <p className="text-[10px] text-amber-700 truncate">Extrayendo silueta, aislando fondo y recalculando color en local</p>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Previsualizador con cuadrícula de transparencia real */}
                     <div 
                       className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-neutral-300 flex items-center justify-center select-none"
@@ -611,14 +728,33 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
                         alt="Preview" 
                         onClick={handlePreviewClick}
                         className={`w-full h-full object-contain p-2 drop-shadow-xs transition-opacity ${
-                          isReProcessing ? 'opacity-40' : 'opacity-100'
+                          isProcessing ? 'opacity-25 blur-[1px]' : isReProcessing ? 'opacity-40' : 'opacity-100'
                         } ${isMagicWandActive ? 'cursor-crosshair' : ''}`} 
                       />
 
-                      {isReProcessing && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-2xs">
-                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900 text-white text-xs font-medium shadow-lg">
-                            <Sparkles className="w-3.5 h-3.5 animate-spin" />
+                      {/* Overlay cuando se procesa o recorta una nueva imagen desde "Cambiar foto" */}
+                      {isProcessing && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-xs text-white p-4 text-center z-20">
+                          <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center mb-2.5 shadow-xl">
+                            <Sparkles className="w-6 h-6 text-amber-300 animate-spin" />
+                          </div>
+                          <span className="text-xs font-bold uppercase tracking-widest text-amber-300">
+                            Procesando en segundo plano
+                          </span>
+                          <p className="text-sm font-semibold text-white mt-0.5">
+                            Aislando prenda & analizando color
+                          </p>
+                          <span className="text-[10.5px] text-neutral-300 mt-1 max-w-xs leading-tight">
+                            Red neuronal en tu dispositivo • 100% privado en local
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Overlay cuando se reajusta sensibilidad / varita */}
+                      {isReProcessing && !isProcessing && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-2xs z-20 animate-in fade-in duration-150">
+                          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-neutral-900/95 text-white text-xs font-medium shadow-xl border border-white/10">
+                            <Sparkles className="w-4 h-4 text-amber-300 animate-spin" />
                             <span>Ajustando silueta...</span>
                           </div>
                         </div>
@@ -627,10 +763,24 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="absolute bottom-3 right-3 px-3 py-1.5 bg-neutral-900/90 text-white text-xs rounded-xl shadow-md cursor-pointer hover:bg-neutral-900 flex items-center gap-1.5 backdrop-blur-xs z-10"
+                        disabled={isProcessing || isReProcessing}
+                        className={`absolute bottom-3 right-3 px-3.5 py-2 text-xs rounded-xl shadow-md flex items-center gap-1.5 backdrop-blur-xs z-30 transition-all ${
+                          isProcessing || isReProcessing
+                            ? 'bg-neutral-800/85 text-neutral-300 cursor-not-allowed opacity-90'
+                            : 'bg-neutral-900/90 text-white cursor-pointer hover:bg-neutral-900 active:scale-95'
+                        }`}
                       >
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>Cambiar foto</span>
+                        {isProcessing ? (
+                          <>
+                            <Sparkles className="w-3.5 h-3.5 animate-spin text-amber-300" />
+                            <span>Procesando nueva foto...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-3.5 h-3.5" />
+                            <span>Cambiar foto</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -696,31 +846,42 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
                     </div>
 
                     <div>
-                      <label className="block font-semibold text-neutral-700 mb-1 flex items-center justify-between">
-                        <span>Color de la prenda</span>
-                        <span className="text-[10px] text-neutral-400 font-normal">Toca para cambiar</span>
-                      </label>
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-neutral-300 bg-white shadow-2xs">
-                        <label className="relative cursor-pointer flex items-center shrink-0" title="Toca para abrir paleta cromática">
-                          <div 
-                            className="w-5 h-5 rounded-full border border-black/20 shadow-2xs shrink-0 cursor-pointer hover:scale-110 transition-transform"
-                            style={{ backgroundColor: itemColorHex }} 
-                          />
-                          <input
-                            type="color"
-                            value={itemColorHex}
-                            onChange={(e) => setItemColorHex(e.target.value)}
-                            className="sr-only"
-                          />
-                        </label>
-                        <input
-                          type="text"
-                          value={itemColorName}
-                          onChange={(e) => setItemColorName(e.target.value)}
-                          placeholder="Nombre del color"
-                          className="w-full text-xs font-medium text-neutral-800 bg-transparent focus:outline-none"
+                      <label className="block font-semibold text-neutral-700 mb-1">Subcategoría o Tipo</label>
+                      <input
+                        type="text"
+                        value={itemSubCategory}
+                        onChange={(e) => setItemSubCategory(e.target.value)}
+                        placeholder="Ej. Blazers, Vaqueros, Tops..."
+                        className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white focus:outline-none focus:ring-1 focus:ring-neutral-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-neutral-700 mb-1 flex items-center justify-between">
+                      <span>Color de la prenda</span>
+                      <span className="text-[10px] text-neutral-400 font-normal">Toca el círculo para elegir</span>
+                    </label>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-neutral-300 bg-white shadow-2xs">
+                      <label className="relative cursor-pointer flex items-center shrink-0" title="Toca para abrir paleta cromática">
+                        <div 
+                          className="w-5 h-5 rounded-full border border-black/20 shadow-2xs shrink-0 cursor-pointer hover:scale-110 transition-transform"
+                          style={{ backgroundColor: itemColorHex }} 
                         />
-                      </div>
+                        <input
+                          type="color"
+                          value={itemColorHex}
+                          onChange={(e) => setItemColorHex(e.target.value)}
+                          className="sr-only"
+                        />
+                      </label>
+                      <input
+                        type="text"
+                        value={itemColorName}
+                        onChange={(e) => setItemColorName(e.target.value)}
+                        placeholder="Nombre del color"
+                        className="w-full text-xs font-medium text-neutral-800 bg-transparent focus:outline-none"
+                      />
                     </div>
                   </div>
 
@@ -758,14 +919,14 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="block font-semibold text-neutral-700 mb-1">Marca / Tienda</label>
                       <input
                         type="text"
                         value={itemBrand}
                         onChange={(e) => setItemBrand(e.target.value)}
-                        placeholder="Zara, Stradivarius..."
+                        placeholder="Zara, Mango..."
                         className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white focus:outline-none focus:ring-1 focus:ring-neutral-800"
                       />
                     </div>
@@ -781,6 +942,65 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
                         className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white focus:outline-none focus:ring-1 focus:ring-neutral-800"
                       />
                     </div>
+
+                    <div>
+                      <label className="block font-semibold text-neutral-700 mb-1">Puestas registradas</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={itemWearCount}
+                        onChange={(e) => setItemWearCount(Math.max(0, parseInt(e.target.value) || 0))}
+                        className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white focus:outline-none focus:ring-1 focus:ring-neutral-800"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Estilos y Vibes de la prenda */}
+                  <div className="space-y-1.5 pt-1">
+                    <label className="block font-semibold text-neutral-700">Estilos & Vibes de la prenda</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {STYLE_OPTIONS.map((style) => {
+                        const isSelected = itemStyles.includes(style);
+                        return (
+                          <button
+                            type="button"
+                            key={style}
+                            onClick={() => toggleItemStyle(style)}
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-neutral-900 text-white border-neutral-900 shadow-2xs font-semibold'
+                                : 'bg-white text-neutral-600 border-neutral-200 hover:bg-[#FAF8F5]'
+                            }`}
+                          >
+                            #{style}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Temporadas recomendadas */}
+                  <div className="space-y-1.5 pt-1">
+                    <label className="block font-semibold text-neutral-700">Temporadas recomendadas</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(['todas', 'primavera', 'verano', 'otono', 'invierno'] as Season[]).map((season) => {
+                        const isSelected = itemSeasons.includes(season);
+                        return (
+                          <button
+                            type="button"
+                            key={season}
+                            onClick={() => toggleItemSeason(season)}
+                            className={`px-3 py-1 rounded-xl text-[11px] font-medium capitalize border transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-rose-950 text-white border-rose-950 shadow-2xs font-semibold'
+                                : 'bg-white text-neutral-600 border-neutral-200 hover:bg-[#FAF8F5]'
+                            }`}
+                          >
+                            {season}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               )}
@@ -793,7 +1013,7 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
                   onClick={handleSaveItem}
                   className="w-full py-2.5 sm:py-3 rounded-2xl bg-neutral-900 text-white font-medium text-xs sm:text-sm hover:bg-neutral-800 transition-colors cursor-pointer shadow-md"
                 >
-                  Añadir Prenda a Mi Armario ✨
+                  {editingItem ? 'Guardar Cambios en la Prenda ✅' : 'Añadir Prenda a Mi Armario ✨'}
                 </button>
               </div>
             )}
@@ -808,6 +1028,7 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
         item={selectedDetailItem}
         onClose={() => setSelectedDetailItem(null)}
         onToggleFavorite={handleToggleFavorite}
+        onEdit={(item) => handleStartEdit(item)}
       />
 
     </div>

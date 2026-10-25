@@ -224,6 +224,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
       console.error(err);
     } finally {
       setIsScanning(false);
+      if (e.target) e.target.value = '';
     }
   };
 
