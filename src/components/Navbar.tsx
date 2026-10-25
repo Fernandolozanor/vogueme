@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Shirt, UserCheck, ShoppingBag, Luggage, BarChart3 } from 'lucide-react';
+import { Sparkles, Shirt, UserCheck, ShoppingBag, Luggage, BarChart3, Calendar } from 'lucide-react';
 import { PrivacyBadge } from './PrivacyBadge';
 
 export type NavTab = 'stylist' | 'closet' | 'profile' | 'shopping' | 'luggage' | 'sustainability';
@@ -8,9 +8,10 @@ interface NavbarProps {
   activeTab: NavTab;
   onTabChange: (tab: NavTab) => void;
   clothesCount: number;
+  onOpenCalendar?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, clothesCount }) => {
+export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, clothesCount, onOpenCalendar }) => {
   const tabs = [
     { id: 'stylist' as NavTab, label: 'Look de Hoy', mobileLabel: 'Look', icon: Sparkles },
     { id: 'closet' as NavTab, label: 'Armario', mobileLabel: 'Armario', icon: Shirt, badge: clothesCount },
@@ -71,8 +72,18 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, clothesC
             })}
           </nav>
 
-          {/* Privacy Badge */}
-          <div className="flex items-center gap-2">
+          {/* Actions & Privacy Badge */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {onOpenCalendar && (
+              <button
+                onClick={onOpenCalendar}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/90 hover:bg-white text-neutral-800 text-xs font-semibold border border-[#E2DBD0] hover:border-neutral-400 cursor-pointer shadow-2xs transition-all shrink-0"
+                title="Abrir Calendario de Outfits y Control de Repetición"
+              >
+                <Calendar className="w-3.5 h-3.5 text-rose-900" />
+                <span className="hidden sm:inline">Calendario</span>
+              </button>
+            )}
             <PrivacyBadge />
           </div>
         </div>

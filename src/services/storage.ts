@@ -128,27 +128,140 @@ export const saveProfile = (profile: UserProfile): void => {
   }
 };
 
+export const getSampleInitialHistory = (): LoggedWear[] => {
+  const clothes = getStoredClothes();
+  if (clothes.length < 5) return [];
+
+  const now = new Date();
+  
+  // Look de ayer
+  const d1 = new Date(now);
+  d1.setDate(d1.getDate() - 1);
+
+  // Look de hace 3 días
+  const d2 = new Date(now);
+  d2.setDate(d2.getDate() - 3);
+
+  // Look de hace 5 días
+  const d3 = new Date(now);
+  d3.setDate(d3.getDate() - 5);
+
+  // Look de hace 8 días
+  const d4 = new Date(now);
+  d4.setDate(d4.getDate() - 8);
+
+  const top1 = clothes.find(c => c.category === 'top');
+  const bottom1 = clothes.find(c => c.category === 'bottom');
+  const outer1 = clothes.find(c => c.category === 'outerwear');
+  const shoes1 = clothes.find(c => c.category === 'shoes');
+  const dress1 = clothes.find(c => c.category === 'dress');
+
+  const history: LoggedWear[] = [];
+
+  if (top1 && bottom1 && shoes1) {
+    history.push({
+      id: 'sample-log-1',
+      date: d1.toISOString(),
+      occasion: 'Universidad & Biblioteca',
+      itemIds: [top1.id, bottom1.id, outer1?.id, shoes1.id].filter((id): id is string => Boolean(id))
+    });
+  }
+
+  if (outer1 && bottom1 && shoes1) {
+    history.push({
+      id: 'sample-log-2',
+      date: d2.toISOString(),
+      occasion: 'Café & Trabajo en remoto',
+      itemIds: [outer1.id, bottom1.id, shoes1.id]
+    });
+  }
+
+  if (dress1 && shoes1) {
+    history.push({
+      id: 'sample-log-3',
+      date: d3.toISOString(),
+      occasion: 'Cena con amigas',
+      itemIds: [dress1.id, shoes1.id]
+    });
+  } else if (top1 && bottom1) {
+    history.push({
+      id: 'sample-log-3',
+      date: d3.toISOString(),
+      occasion: 'Cena con amigas',
+      itemIds: [top1.id, bottom1.id]
+    });
+  }
+
+  if (top1 && shoes1) {
+    history.push({
+      id: 'sample-log-4',
+      date: d4.toISOString(),
+      occasion: 'Reunión informal',
+      itemIds: [top1.id, shoes1.id]
+    });
+  }
+
+  return history;
+};
+
 export const logOutfitWear = (occasion: string, itemIds: string[]): void => {
+  logOutfitWearForDate(new Date().toISOString(), occasion, itemIds);
+};
+
+export const logOutfitWearForDate = (dateIso: string, occasion: string, itemIds: string[]): LoggedWear[] => {
   try {
     const raw = localStorage.getItem(OUTFIT_HISTORY_KEY);
-    const history: LoggedWear[] = raw ? JSON.parse(raw) : [];
+    const history: LoggedWear[] = raw ? JSON.parse(raw) : getSampleInitialHistory();
+
+    const targetDay = dateIso.split('T')[0];
+    // Reemplaza si ya había uno para ese día o añade uno nuevo
+    const filtered = history.filter(l => l.date.split('T')[0] !== targetDay);
+
     const newLog: LoggedWear = {
       id: 'log-' + Date.now(),
-      date: new Date().toISOString(),
+      date: dateIso,
       occasion,
       itemIds
     };
-    localStorage.setItem(OUTFIT_HISTORY_KEY, JSON.stringify([newLog, ...history]));
+
+    const updated = [newLog, ...filtered].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    localStorage.setItem(OUTFIT_HISTORY_KEY, JSON.stringify(updated));
     incrementWearCount(itemIds);
+    return updated;
   } catch (err) {
-    console.error('Error logging outfit wear', err);
+    console.error('Error logging outfit wear for date', err);
+    return [];
+  }
+};
+
+export const deleteOutfitLog = (logId: string): LoggedWear[] => {
+  try {
+    const raw = localStorage.getItem(OUTFIT_HISTORY_KEY);
+    const history: LoggedWear[] = raw ? JSON.parse(raw) : [];
+    const updated = history.filter(item => item.id !== logId);
+    localStorage.setItem(OUTFIT_HISTORY_KEY, JSON.stringify(updated));
+    return updated;
+  } catch (err) {
+    console.error('Error deleting outfit log', err);
+    return [];
   }
 };
 
 export const getOutfitHistory = (): LoggedWear[] => {
   try {
     const raw = localStorage.getItem(OUTFIT_HISTORY_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) {
+      const initial = getSampleInitialHistory();
+      if (initial.length > 0) {
+        localStorage.setItem(OUTFIT_HISTORY_KEY, JSON.stringify(initial));
+        return initial;
+      }
+      return [];
+    }
+    return JSON.parse(raw);
   } catch (err) {
     console.error('Error getting outfit history', err);
     return [];

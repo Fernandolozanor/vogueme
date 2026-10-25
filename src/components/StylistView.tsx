@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   Sparkles, 
@@ -6,7 +6,6 @@ import {
   Calendar, 
   Heart, 
   RefreshCw, 
-  Check, 
   Sun, 
   Moon, 
   Sunset,
@@ -21,12 +20,14 @@ import {
   Gem,
   CloudSun,
   ZoomIn,
-  HelpCircle
+  HelpCircle,
+  AlertTriangle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { ClothingItem, UserProfile, OccasionQuery, OutfitRecommendation, QuerySeason, ColorSwatch } from '../types';
 import { generateOutfitRecommendation } from '../services/stylistEngine';
-import { logOutfitWear } from '../services/storage';
+import { logOutfitWear, getOutfitHistory } from '../services/storage';
+import { analyzeOutfitAgainstHistory } from '../services/repetitionEngine';
 import { GarmentDetailModal } from './GarmentDetailModal';
 import { ColorSeasonModal } from './ColorSeasonModal';
 
@@ -36,6 +37,7 @@ interface StylistViewProps {
   onNavigateToCloset: () => void;
   onNavigateToProfile?: () => void;
   onRefreshWardrobe: () => void;
+  onOpenCalendar?: () => void;
 }
 
 const PRESET_ACTIVITIES = [
@@ -222,7 +224,8 @@ export const StylistView: React.FC<StylistViewProps> = ({
   profile,
   onNavigateToCloset,
   onNavigateToProfile,
-  onRefreshWardrobe
+  onRefreshWardrobe,
+  onOpenCalendar
 }) => {
   const { width: windowWidth } = useWindowSize();
   const isDesktop = windowWidth >= 1024;
@@ -278,6 +281,23 @@ export const StylistView: React.FC<StylistViewProps> = ({
   const [currentOuterwear, setCurrentOuterwear] = useState<ClothingItem | undefined>(recommendation?.items.outerwear);
   const [currentShoes, setCurrentShoes] = useState<ClothingItem | undefined>(recommendation?.items.shoes);
   const [currentAccessory, setCurrentAccessory] = useState<ClothingItem | undefined>(recommendation?.items.accessory);
+
+  // Prendas activas del look actual para evaluación de repetición visual
+  const currentOutfitItems = useMemo(() => {
+    return [
+      currentDress || currentTop,
+      currentBottom,
+      currentOuterwear,
+      currentShoes,
+      currentAccessory
+    ].filter((i): i is ClothingItem => Boolean(i));
+  }, [currentDress, currentTop, currentBottom, currentOuterwear, currentShoes, currentAccessory]);
+
+  const history = useMemo(() => getOutfitHistory(), [wornToday, wardrobe]);
+
+  const repetitionDiagnosis = useMemo(() => {
+    return analyzeOutfitAgainstHistory(currentOutfitItems, history, wardrobe);
+  }, [currentOutfitItems, history, wardrobe]);
 
   const handleGenerate = (closeModal = false) => {
     if (wardrobe.length === 0) return;
@@ -680,16 +700,16 @@ export const StylistView: React.FC<StylistViewProps> = ({
                 </button>
 
                 <button
-                  onClick={handleWearToday}
-                  disabled={wornToday}
+                  onClick={wornToday ? onOpenCalendar : handleWearToday}
                   className={`py-2.5 px-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-98 ${
                     wornToday
-                      ? 'bg-emerald-700 text-white'
+                      ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
                       : 'bg-[#E8E1D3] hover:bg-[#DDD5C5] text-neutral-900 border border-[#D6CDBC]'
                   }`}
+                  title={wornToday ? 'Ver en el calendario de looks' : 'Registrar outfit de hoy'}
                 >
-                  {wornToday ? <Check className="w-3.5 h-3.5" /> : <Heart className="w-3.5 h-3.5 text-rose-800 fill-rose-800" />}
-                  <span>{wornToday ? '¡Guardado hoy!' : '¡Me lo pongo!'}</span>
+                  {wornToday ? <Calendar className="w-3.5 h-3.5" /> : <Heart className="w-3.5 h-3.5 text-rose-800 fill-rose-800" />}
+                  <span>{wornToday ? '¡Guardado! Ver Calendario' : '¡Me lo pongo!'}</span>
                 </button>
               </div>
             </div>
@@ -746,6 +766,20 @@ export const StylistView: React.FC<StylistViewProps> = ({
                 </p>
               </div>
 
+              {/* Botón Calendario de Looks */}
+              {onOpenCalendar && (
+                <button
+                  onClick={onOpenCalendar}
+                  className="w-full py-2 px-3 rounded-xl bg-white hover:bg-neutral-50 text-neutral-800 font-semibold text-[11px] flex items-center justify-between border border-[#E2DBD0] transition-colors cursor-pointer shrink-0 mt-2 shadow-2xs"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-rose-900" />
+                    <span>Calendario de Outfits & Repetición</span>
+                  </span>
+                  <ArrowRight className="w-3 h-3 text-neutral-400" />
+                </button>
+              )}
+
               {/* Botón a perfil / colorimetría */}
               {onNavigateToProfile && (
                 <button
@@ -792,6 +826,44 @@ export const StylistView: React.FC<StylistViewProps> = ({
               </span>
             </div>
           </div>
+
+          {/* Alerta Inteligente de Repetición Visual del Look */}
+          {repetitionDiagnosis && (
+            <div 
+              onClick={onOpenCalendar}
+              className={`mt-2 py-1.5 px-3 rounded-xl border flex items-center justify-between gap-2 cursor-pointer transition-all ${
+                repetitionDiagnosis.level === 'high'
+                  ? 'bg-rose-50 border-rose-300 text-rose-950 hover:bg-rose-100 shadow-2xs'
+                  : repetitionDiagnosis.level === 'moderate'
+                  ? 'bg-amber-50 border-amber-300 text-amber-950 hover:bg-amber-100 shadow-2xs'
+                  : 'bg-emerald-50/90 border-emerald-300 text-emerald-950 hover:bg-emerald-100 shadow-2xs'
+              }`}
+              title="Pulsa para abrir el Calendario de Outfits y Control de Repetición"
+            >
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                {repetitionDiagnosis.level === 'high' ? (
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                ) : repetitionDiagnosis.level === 'moderate' ? (
+                  <Info className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                )}
+                <span className="text-xs font-bold shrink-0">
+                  {repetitionDiagnosis.badgeText}
+                </span>
+                <span className="text-[11px] text-neutral-600 truncate hidden sm:inline">
+                  — {repetitionDiagnosis.detail}
+                </span>
+              </div>
+
+              {onOpenCalendar && (
+                <div className="flex items-center gap-1 text-[10.5px] font-bold text-neutral-800 hover:text-black shrink-0 underline ml-2">
+                  <span>Calendario</span>
+                  <ArrowRight className="w-3 h-3" />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* GRID DE PRENDAS CONTENIDO: EN PC DISTRIBUIDO ARRIBA Y ABAJO */}
           <div className="my-auto py-1 flex-1 min-h-0 flex flex-col justify-center w-full max-w-full gap-2">
@@ -891,14 +963,14 @@ export const StylistView: React.FC<StylistViewProps> = ({
           </button>
 
           <button
-            onClick={handleWearToday}
-            disabled={wornToday}
+            onClick={wornToday ? onOpenCalendar : handleWearToday}
             className={`py-2.5 px-2 rounded-2xl font-semibold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer shadow-sm min-w-0 truncate ${
-              wornToday ? 'bg-emerald-700 text-white' : 'bg-neutral-900 text-white'
+              wornToday ? 'bg-emerald-700 hover:bg-emerald-800 text-white' : 'bg-neutral-900 text-white'
             }`}
+            title={wornToday ? 'Ver look en el calendario' : 'Registrar outfit de hoy'}
           >
-            {wornToday ? <Check className="w-3.5 h-3.5 shrink-0" /> : <Heart className="w-3.5 h-3.5 text-rose-300 fill-rose-300 shrink-0" />}
-            <span className="truncate">{wornToday ? '¡Guardado!' : 'Me lo pongo'}</span>
+            {wornToday ? <Calendar className="w-3.5 h-3.5 shrink-0" /> : <Heart className="w-3.5 h-3.5 text-rose-300 fill-rose-300 shrink-0" />}
+            <span className="truncate">{wornToday ? 'Calendario' : 'Me lo pongo'}</span>
           </button>
 
           <button

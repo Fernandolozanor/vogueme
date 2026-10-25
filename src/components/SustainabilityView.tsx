@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TrendingUp, AlertCircle, Award, ChevronDown, ChevronUp } from 'lucide-react';
+import { TrendingUp, AlertCircle, Award, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import type { ClothingItem } from '../types';
 import { GarmentDetailModal } from './GarmentDetailModal';
 import { toggleFavoriteItem } from '../services/storage';
@@ -8,13 +8,15 @@ interface SustainabilityViewProps {
   wardrobe: ClothingItem[];
   onSelectGarmentForLook?: (item: ClothingItem) => void;
   onWardrobeChange?: (updated: ClothingItem[]) => void;
+  onOpenCalendar?: () => void;
 }
 
 type MetricCardSection = 'investments' | 'forgotten';
 
 export const SustainabilityView: React.FC<SustainabilityViewProps> = ({ 
   wardrobe,
-  onWardrobeChange
+  onWardrobeChange,
+  onOpenCalendar
 }) => {
   const [selectedGarment, setSelectedGarment] = useState<{ item: ClothingItem; role?: string } | null>(null);
 
@@ -88,16 +90,27 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
           </p>
         </div>
 
-        <div className="bg-white rounded-xl sm:rounded-3xl p-2.5 sm:p-5 border border-neutral-200/90 shadow-2xs space-y-0.5 sm:space-y-1 min-w-0">
-          <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-neutral-400 block truncate">
-            Puestas Registradas
-          </span>
+        <div 
+          onClick={onOpenCalendar}
+          className={`bg-white rounded-xl sm:rounded-3xl p-2.5 sm:p-5 border border-neutral-200/90 shadow-2xs space-y-0.5 sm:space-y-1 min-w-0 ${
+            onOpenCalendar ? 'cursor-pointer hover:border-neutral-400 hover:shadow-xs transition-all' : ''
+          }`}
+          title={onOpenCalendar ? "Pulsa para abrir el Calendario de Outfits" : undefined}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-neutral-400 block truncate">
+              Puestas Registradas
+            </span>
+            {onOpenCalendar && (
+              <Calendar className="w-3 h-3 text-rose-900 hidden sm:block" />
+            )}
+          </div>
           <div className="flex items-baseline gap-1">
             <span className="font-serif text-lg sm:text-3xl font-bold text-neutral-900">{totalWearCount}</span>
             <span className="text-[9.5px] sm:text-xs text-neutral-500">looks</span>
           </div>
           <p className="text-[10px] sm:text-[11px] text-neutral-500 pt-0.5 hidden sm:block">
-            Sumando outfits de tus {totalItems} prendas.
+            {onOpenCalendar ? "Toca para ver el calendario mensual ↗" : `Sumando outfits de tus ${totalItems} prendas.`}
           </p>
         </div>
 

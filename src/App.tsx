@@ -7,6 +7,7 @@ import { ShoppingGapsView } from './components/ShoppingGapsView';
 import { LuggageView } from './components/LuggageView';
 import { SustainabilityView } from './components/SustainabilityView';
 import { InstallPwaPrompt } from './components/InstallPwaPrompt';
+import { OutfitCalendarModal } from './components/OutfitCalendarModal';
 import type { ClothingItem, UserProfile } from './types';
 import { getStoredClothes, getStoredProfile } from './services/storage';
 
@@ -14,6 +15,7 @@ export function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('stylist');
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>(() => getStoredClothes());
   const [profile, setProfile] = useState<UserProfile>(() => getStoredProfile());
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const handleRefreshWardrobe = () => {
     setWardrobe(getStoredClothes());
@@ -30,6 +32,7 @@ export function App() {
         activeTab={activeTab} 
         onTabChange={setActiveTab} 
         clothesCount={wardrobe.length} 
+        onOpenCalendar={() => setIsCalendarOpen(true)}
       />
 
       {/* Main Screen Content */}
@@ -41,6 +44,7 @@ export function App() {
             onNavigateToCloset={() => setActiveTab('closet')}
             onNavigateToProfile={() => setActiveTab('profile')}
             onRefreshWardrobe={handleRefreshWardrobe}
+            onOpenCalendar={() => setIsCalendarOpen(true)}
           />
         )}
 
@@ -78,6 +82,7 @@ export function App() {
           <SustainabilityView 
             wardrobe={wardrobe} 
             onWardrobeChange={setWardrobe}
+            onOpenCalendar={() => setIsCalendarOpen(true)}
           />
         )}
       </main>
@@ -103,6 +108,14 @@ export function App() {
 
       {/* Floating PWA Install Banner */}
       <InstallPwaPrompt />
+
+      {/* Outfit Calendar & Repetition Tracker Modal */}
+      <OutfitCalendarModal
+        isOpen={isCalendarOpen}
+        onClose={() => setIsCalendarOpen(false)}
+        wardrobe={wardrobe}
+        onHistoryChange={handleRefreshWardrobe}
+      />
     </div>
   );
 }
