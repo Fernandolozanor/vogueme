@@ -9,6 +9,7 @@ import {
   getOutfitHistory, 
   deleteOutfitLog, 
   logOutfitWearForDate, 
+  isSameOutfitItems,
   type LoggedWear 
 } from '../services/storage';
 import { 
@@ -67,12 +68,13 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
     }
   }, [isOpen, initialSelectedDate]);
 
-  // Mapeo fecha "YYYY-MM-DD" -> LoggedWear
+  // Mapeo fecha "YYYY-MM-DD" -> LoggedWear[] (permite múltiples outfits en un mismo día)
   const logsByDate = useMemo(() => {
-    const map = new Map<string, LoggedWear>();
+    const map = new Map<string, LoggedWear[]>();
     history.forEach(log => {
       const datePart = log.date.split('T')[0];
-      map.set(datePart, log);
+      const existing = map.get(datePart) || [];
+      map.set(datePart, [...existing, log]);
     });
     return map;
   }, [history]);
@@ -123,7 +125,7 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
       dayNum: number;
       dateStr: string;
       isCurrentMonth: boolean;
-      log?: LoggedWear;
+      logs: LoggedWear[];
     }> = [];
 
     // Días de relleno del mes anterior
@@ -136,13 +138,12 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
         dayNum,
         dateStr,
         isCurrentMonth: false,
-        log: logsByDate.get(dateStr)
+        logs: logsByDate.get(dateStr) || []
       });
     }
 
     // Días del mes actual
     for (let d = 1; d <= totalDays; d++) {
-      // Evitar desfase horario usando formato manual YYYY-MM-DD
       const monthPadded = String(month + 1).padStart(2, '0');
       const dayPadded = String(d).padStart(2, '0');
       const dateStr = `${year}-${monthPadded}-${dayPadded}`;
@@ -151,11 +152,11 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
         dayNum: d,
         dateStr,
         isCurrentMonth: true,
-        log: logsByDate.get(dateStr)
+        logs: logsByDate.get(dateStr) || []
       });
     }
 
-    // Días de relleno del mes siguiente para completar cuadrícula de 35 o 42 celdas
+    // Días de relleno del mes siguiente para completar cuadrícula
     const remaining = (7 - (days.length % 7)) % 7;
     for (let i = 1; i <= remaining; i++) {
       const nextDate = new Date(year, month + 1, i);
@@ -164,31 +165,31 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
         dayNum: i,
         dateStr,
         isCurrentMonth: false,
-        log: logsByDate.get(dateStr)
+        logs: logsByDate.get(dateStr) || []
       });
     }
 
     return days;
   }, [currentDate, logsByDate]);
 
-  // Outfit del día seleccionado
-  const selectedLog = logsByDate.get(selectedDayStr);
-  const selectedItems = useMemo(() => {
-    if (!selectedLog) return [];
-    return selectedLog.itemIds
+  // Outfits del día seleccionado
+  const selectedLogs = useMemo(() => {
+    return logsByDate.get(selectedDayStr) || [];
+  }, [logsByDate, selectedDayStr]);
+
+  // Función para obtener diagnóstico de repetición de un outfit específico
+  const getLogDiagnosis = (log: LoggedWear) => {
+    const logItems = log.itemIds
       .map(id => wardrobeMap.get(id))
       .filter((i): i is ClothingItem => Boolean(i));
-  }, [selectedLog, wardrobeMap]);
+    if (logItems.length === 0) return null;
 
-  // Análisis de repetición del día seleccionado respecto a días previos
-  const selectedDayDiagnosis = useMemo(() => {
-    if (!selectedLog || selectedItems.length === 0) return null;
-
-    const selectedTime = new Date(selectedLog.date).getTime();
-    // Filtramos looks anteriores a este día (hasta 14 días antes)
+    const logTime = new Date(log.date).getTime();
+    // Filtramos looks anteriores a este (hasta 14 días antes)
     const priorLogs = history.filter(l => {
+      if (l.id === log.id) return false;
       const t = new Date(l.date).getTime();
-      return t < selectedTime && (selectedTime - t) <= 14 * 24 * 60 * 60 * 1000;
+      return t < logTime && (logTime - t) <= 14 * 24 * 60 * 60 * 1000;
     });
 
     if (priorLogs.length === 0) {
@@ -205,27 +206,29 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
 
     priorLogs.forEach(pl => {
       const plItems = pl.itemIds.map(id => wardrobeMap.get(id)).filter(Boolean) as ClothingItem[];
-      const comp = calculateOutfitSimilarity(selectedItems, plItems);
+      const comp = calculateOutfitSimilarity(logItems, plItems);
       if (comp.similarityScore > maxSim) {
         maxSim = comp.similarityScore;
-        closestDaysAgo = Math.floor((selectedTime - new Date(pl.date).getTime()) / (1000 * 60 * 60 * 24));
+        closestDaysAgo = Math.max(0, Math.floor((logTime - new Date(pl.date).getTime()) / (1000 * 60 * 60 * 24)));
         dominantPiece = comp.dominantSharedItem?.name;
       }
     });
 
     if (maxSim >= 70 && closestDaysAgo <= 4) {
+      const dayLabel = closestDaysAgo === 0 ? 'hoy' : closestDaysAgo === 1 ? 'ayer' : `hace ${closestDaysAgo} días`;
       return {
         level: 'high' as RepetitionLevel,
         score: maxSim,
-        text: `Repetición alta (${maxSim}% coincidencia visual con look de hace ${closestDaysAgo} días)`
+        text: `Repetición alta (${maxSim}% coincidencia visual con look de ${dayLabel})`
       };
     }
 
     if (maxSim >= 45 && closestDaysAgo <= 6) {
+      const dayLabel = closestDaysAgo === 0 ? 'hoy' : closestDaysAgo === 1 ? 'ayer' : `hace ${closestDaysAgo} días`;
       return {
         level: 'moderate' as RepetitionLevel,
         score: maxSim,
-        text: `Prenda repetida (${dominantPiece || 'pieza clave'} usada hace ${closestDaysAgo} días)`
+        text: `Prenda repetida (${dominantPiece || 'pieza clave'} usada ${dayLabel})`
       };
     }
 
@@ -234,13 +237,12 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
       score: maxSim,
       text: 'Look variado y equilibrado'
     };
-  }, [selectedLog, selectedItems, history, wardrobeMap]);
+  };
 
-  // Borrar look del día seleccionado
-  const handleDeleteSelectedLog = () => {
-    if (!selectedLog) return;
-    if (window.confirm('¿Seguro que deseas eliminar el look registrado de este día?')) {
-      const updated = deleteOutfitLog(selectedLog.id);
+  // Borrar un look concreto
+  const handleDeleteLog = (logId: string) => {
+    if (window.confirm('¿Seguro que deseas eliminar este outfit registrado del calendario?')) {
+      const updated = deleteOutfitLog(logId);
       setHistory(updated);
       onHistoryChange?.();
     }
@@ -250,6 +252,13 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
   const handleSaveManualLook = () => {
     if (selectedGarmentIds.length === 0) {
       alert('Selecciona al menos una prenda para el look.');
+      return;
+    }
+
+    // Verificar si ya existe este mismo outfit en este mismo día
+    const isDuplicate = selectedLogs.some(l => isSameOutfitItems(l.itemIds, selectedGarmentIds));
+    if (isDuplicate) {
+      alert('Este conjunto exacto de prendas ya está registrado en este día. Puedes elegir otras prendas o combinaciones.');
       return;
     }
 
@@ -286,21 +295,20 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 truncate">
+                <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 leading-snug break-words">
                   Calendario de Outfits
                 </h2>
                 <span className="text-[10px] tracking-wider uppercase font-semibold text-rose-950 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 shrink-0 hidden sm:inline">
                   Control de Repeticiones
                 </span>
               </div>
-              <p className="text-[11px] text-neutral-500 truncate">
-                Historial diario y detector de prendas repetidas por impacto visual
+              <p className="text-[11px] text-neutral-500 leading-tight">
+                Registra tus looks diarios, añade varios por día y controla repeticiones
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Botón Hoy */}
             <button
               onClick={handleGoToday}
               className="px-2.5 py-1 text-xs font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-lg cursor-pointer transition-colors"
@@ -392,11 +400,13 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                   {calendarDays.map((cell, idx) => {
                     const isSelected = cell.dateStr === selectedDayStr;
                     const isToday = cell.dateStr === todayStr;
-                    const hasLog = Boolean(cell.log);
+                    const hasLogs = cell.logs.length > 0;
 
-                    const logItems = hasLog 
-                      ? (cell.log!.itemIds.map(id => wardrobeMap.get(id)).filter(Boolean) as ClothingItem[])
-                      : [];
+                    // Prendas únicas de todos los looks de este día para la vista miniatura
+                    const uniqueGarmentIds = Array.from(new Set(cell.logs.flatMap(l => l.itemIds)));
+                    const previewGarments = uniqueGarmentIds
+                      .map(id => wardrobeMap.get(id))
+                      .filter((i): i is ClothingItem => Boolean(i));
 
                     return (
                       <button
@@ -408,7 +418,7 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                         className={`min-h-[58px] sm:min-h-[72px] p-1 sm:p-1.5 rounded-xl border flex flex-col justify-between items-start text-left cursor-pointer transition-all relative ${
                           isSelected
                             ? 'border-neutral-900 ring-2 ring-neutral-900/10 bg-neutral-50 shadow-xs'
-                            : hasLog
+                            : hasLogs
                             ? 'border-[#E2DBD0] bg-[#FAF8F5] hover:border-neutral-400'
                             : 'border-transparent hover:bg-neutral-50'
                         } ${!cell.isCurrentMonth ? 'opacity-35' : ''}`}
@@ -424,15 +434,22 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                             {cell.dayNum}
                           </span>
 
-                          {hasLog && (
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Look registrado" />
+                          {hasLogs && (
+                            <div className="flex items-center gap-1">
+                              {cell.logs.length > 1 && (
+                                <span className="text-[8px] font-bold text-rose-950 bg-rose-100/90 px-1 py-0.2 rounded">
+                                  {cell.logs.length}
+                                </span>
+                              )}
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title={`${cell.logs.length} outfit(s) registrado(s)`} />
+                            </div>
                           )}
                         </div>
 
-                        {/* Vista miniatura de prendas si tiene log */}
-                        {hasLog && logItems.length > 0 ? (
+                        {/* Miniaturas de prendas si tiene looks */}
+                        {hasLogs && previewGarments.length > 0 ? (
                           <div className="flex items-center -space-x-1.5 overflow-hidden w-full pt-1">
-                            {logItems.slice(0, 3).map((item, iIdx) => (
+                            {previewGarments.slice(0, 3).map((item, iIdx) => (
                               <div
                                 key={iIdx}
                                 className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-white bg-white overflow-hidden shrink-0 shadow-2xs"
@@ -440,9 +457,9 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                                 <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
                               </div>
                             ))}
-                            {logItems.length > 3 && (
+                            {previewGarments.length > 3 && (
                               <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-white bg-neutral-200 text-[8px] font-bold text-neutral-700 flex items-center justify-center shrink-0">
-                                +{logItems.length - 3}
+                                +{previewGarments.length - 3}
                               </div>
                             )}
                           </div>
@@ -454,21 +471,21 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                   })}
                 </div>
 
-                {/* Leyenda rápida */}
+                {/* Leyenda */}
                 <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-[10px] text-neutral-500">
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" /> Con outfit registrado
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" /> Outfit registrado
                     </span>
                     <span className="flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-rose-950" /> Hoy
                     </span>
                   </div>
-                  <span className="text-neutral-400">Pulsa cualquier día para ver detalle</span>
+                  <span className="text-neutral-400">Puedes registrar varios looks por día</span>
                 </div>
               </div>
 
-              {/* Columna Derecha: Detalle del día seleccionado */}
+              {/* Columna Derecha: Detalle de los looks del día seleccionado */}
               <div className="lg:col-span-5 bg-white p-3.5 sm:p-5 rounded-2xl border border-[#E8E2D6] shadow-2xs space-y-3.5">
                 
                 {/* Cabecera del día */}
@@ -487,89 +504,109 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                     </h4>
                   </div>
 
-                  {selectedLog && (
-                    <button
-                      onClick={handleDeleteSelectedLog}
-                      className="p-1.5 text-neutral-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer transition-colors"
-                      title="Eliminar registro de este día"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700">
+                    {selectedLogs.length} {selectedLogs.length === 1 ? 'look' : 'looks'}
+                  </span>
                 </div>
 
-                {/* Caso 1: Hay un look registrado para este día */}
-                {selectedLog && !isAddingLook && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-neutral-800 bg-neutral-100 px-2.5 py-0.5 rounded-full">
-                        {selectedLog.occasion || 'Look del día'}
-                      </span>
-                      <span className="text-[11px] text-neutral-400">
-                        {selectedItems.length} prendas combinadas
-                      </span>
-                    </div>
+                {/* Caso 1: Hay looks registrados para este día y no está en modo añadir */}
+                {selectedLogs.length > 0 && !isAddingLook && (
+                  <div className="space-y-3.5 max-h-[460px] overflow-y-auto pr-1">
+                    {selectedLogs.map((log, lIdx) => {
+                      const logItems = log.itemIds
+                        .map(id => wardrobeMap.get(id))
+                        .filter((i): i is ClothingItem => Boolean(i));
+                      const diagnosis = getLogDiagnosis(log);
 
-                    {/* Badge de Diagnóstico de Repetición para este día */}
-                    {selectedDayDiagnosis && (
-                      <div className={`p-2.5 rounded-xl border text-xs flex items-center gap-2 ${
-                        selectedDayDiagnosis.level === 'high'
-                          ? 'bg-rose-50 border-rose-200 text-rose-900'
-                          : selectedDayDiagnosis.level === 'moderate'
-                          ? 'bg-amber-50 border-amber-200 text-amber-900'
-                          : 'bg-emerald-50 border-emerald-200 text-emerald-900'
-                      }`}>
-                        {selectedDayDiagnosis.level === 'high' ? (
-                          <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
-                        ) : selectedDayDiagnosis.level === 'moderate' ? (
-                          <Info className="w-4 h-4 shrink-0 text-amber-600" />
-                        ) : (
-                          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
-                        )}
-                        <span className="text-[11px] font-medium leading-snug">
-                          {selectedDayDiagnosis.text}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Cuadrícula de prendas */}
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
-                        Prendas llevadas
-                      </span>
-                      <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
-                        {selectedItems.map(item => (
-                          <div
-                            key={item.id}
-                            onClick={() => setInspectedGarment(item)}
-                            className="p-2 rounded-xl border border-neutral-200/80 hover:border-neutral-400 bg-[#FAF8F5] flex items-center justify-between gap-2.5 cursor-pointer transition-all group"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-9 h-9 rounded-lg bg-white overflow-hidden p-0.5 shrink-0 border border-neutral-100 flex items-center justify-center">
-                                <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
-                              </div>
-                              <div className="min-w-0">
-                                <h5 className="text-xs font-semibold text-neutral-900 leading-snug break-words group-hover:text-rose-950">
-                                  {item.name}
-                                </h5>
-                                <span className="text-[10px] text-neutral-400 capitalize block break-words">
-                                  {item.category} • {item.colorName}
-                                </span>
-                              </div>
+                      return (
+                        <div key={log.id} className="p-3 bg-[#FAF8F5] rounded-2xl border border-neutral-200/90 space-y-2.5 shadow-2xs">
+                          {/* Encabezado del Look */}
+                          <div className="flex items-center justify-between border-b border-neutral-200/70 pb-2">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-rose-950 bg-rose-100/80 px-2 py-0.5 rounded-full shrink-0">
+                                Look #{lIdx + 1}
+                              </span>
+                              <span className="text-xs font-bold text-neutral-800 truncate">
+                                {log.occasion || 'Look diario'}
+                              </span>
                             </div>
 
-                            <span className="text-[10px] text-neutral-500 font-medium shrink-0">
-                              {item.purchasePrice ? `${item.purchasePrice} €` : ''}
-                            </span>
+                            <button
+                              onClick={() => handleDeleteLog(log.id)}
+                              className="p-1 text-neutral-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer transition-colors shrink-0"
+                              title="Eliminar este outfit del calendario"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
-                        ))}
-                      </div>
-                    </div>
+
+                          {/* Diagnóstico de Repetición del Look */}
+                          {diagnosis && (
+                            <div className={`p-2 rounded-xl border text-[11px] flex items-center gap-1.5 ${
+                              diagnosis.level === 'high'
+                                ? 'bg-rose-50 border-rose-200 text-rose-900'
+                                : diagnosis.level === 'moderate'
+                                ? 'bg-amber-50 border-amber-200 text-amber-900'
+                                : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                            }`}>
+                              {diagnosis.level === 'high' ? (
+                                <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-rose-600" />
+                              ) : diagnosis.level === 'moderate' ? (
+                                <Info className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+                              ) : (
+                                <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                              )}
+                              <span className="font-medium leading-snug">
+                                {diagnosis.text}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Lista de prendas del outfit */}
+                          <div className="space-y-1.5">
+                            {logItems.map(item => (
+                              <div
+                                key={item.id}
+                                onClick={() => setInspectedGarment(item)}
+                                className="p-2 rounded-xl border border-neutral-200/70 bg-white hover:border-neutral-400 flex items-center justify-between gap-2.5 cursor-pointer transition-all group"
+                              >
+                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                  <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] overflow-hidden p-0.5 shrink-0 border border-neutral-100 flex items-center justify-center">
+                                    <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <h5 className="text-xs font-semibold text-neutral-900 leading-snug break-words group-hover:text-rose-950">
+                                      {item.name}
+                                    </h5>
+                                    <span className="text-[10px] text-neutral-400 capitalize block">
+                                      {item.category} • {item.colorName}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <span className="text-[10px] text-neutral-500 font-medium shrink-0">
+                                  {item.purchasePrice ? `${item.purchasePrice} €` : ''}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Botón para añadir un look adicional al mismo día */}
+                    <button
+                      onClick={() => setIsAddingLook(true)}
+                      className="w-full py-2 bg-white hover:bg-neutral-50 border border-dashed border-neutral-300 hover:border-neutral-800 text-neutral-700 text-xs font-semibold rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>+ Registrar otro look para este día</span>
+                    </button>
                   </div>
                 )}
 
-                {/* Caso 2: No hay look registrado y no está en modo edición */}
-                {!selectedLog && !isAddingLook && (
+                {/* Caso 2: No hay looks registrados este día y no está en modo edición */}
+                {selectedLogs.length === 0 && !isAddingLook && (
                   <div className="text-center py-6 sm:py-8 space-y-3">
                     <div className="w-12 h-12 rounded-full bg-neutral-100 text-neutral-400 flex items-center justify-center mx-auto">
                       <CalendarIcon className="w-6 h-6" />
@@ -579,7 +616,7 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                         No hay look registrado para este día
                       </p>
                       <p className="text-[11px] text-neutral-400 max-w-xs mx-auto">
-                        ¿Llevaste un conjunto este día? Puedes asignarlo retroactivamente para mantener al día tus métricas.
+                        Puedes registrar looks desde la pestaña "Look" con el botón "Me lo pongo" o crearlo aquí directamente.
                       </p>
                     </div>
 
@@ -593,12 +630,12 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                   </div>
                 )}
 
-                {/* Caso 3: Modo añadir / editar look para esta fecha */}
+                {/* Caso 3: Modo añadir look para esta fecha */}
                 {isAddingLook && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-neutral-900">
-                        Selecciona las prendas del look:
+                        Selecciona prendas para el nuevo look:
                       </span>
                       <button
                         onClick={() => setIsAddingLook(false)}
@@ -617,7 +654,7 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                         type="text"
                         value={manualOccasion}
                         onChange={(e) => setManualOccasion(e.target.value)}
-                        placeholder="Ej: Oficina, Cena, Casual..."
+                        placeholder="Ej: Oficina, Noche de fiesta, Deporte..."
                         className="w-full text-xs px-2.5 py-1.5 rounded-lg border border-neutral-300 focus:outline-none focus:border-neutral-900 bg-white"
                       />
                     </div>
@@ -698,7 +735,7 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
 
                 <div className="bg-white p-3 sm:p-4 rounded-2xl border border-[#E8E2D6] shadow-2xs space-y-0.5">
                   <span className="text-[10px] uppercase font-bold text-neutral-400">Diagnóstico IA</span>
-                  <div className="font-serif text-base sm:text-lg font-bold text-neutral-900 truncate">
+                  <div className="font-serif text-base sm:text-lg font-bold text-neutral-900 leading-snug break-words">
                     {monthlyStats.rotationPercentage >= 60 ? '✨ Variedad Alta' : '🔄 Rotación Moderada'}
                   </div>
                   <span className="text-[10px] text-neutral-500">armario equilibrado</span>
@@ -771,7 +808,7 @@ export const OutfitCalendarModal: React.FC<OutfitCalendarModalProps> = ({
                         key={log.id}
                         className="p-3 rounded-xl border border-neutral-200/80 bg-[#FAF8F5] flex items-center justify-between gap-3"
                       >
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <span className="text-[10px] font-bold text-neutral-400 block uppercase">
                             {new Date(log.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
                           </span>

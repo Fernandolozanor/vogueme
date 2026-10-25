@@ -204,8 +204,14 @@ export const getSampleInitialHistory = (): LoggedWear[] => {
   return history;
 };
 
-export const logOutfitWear = (occasion: string, itemIds: string[]): void => {
-  logOutfitWearForDate(new Date().toISOString(), occasion, itemIds);
+export const isSameOutfitItems = (itemsA: string[], itemsB: string[]): boolean => {
+  if (itemsA.length !== itemsB.length) return false;
+  const setA = new Set(itemsA);
+  return itemsB.every(id => setA.has(id));
+};
+
+export const logOutfitWear = (occasion: string, itemIds: string[]): LoggedWear[] => {
+  return logOutfitWearForDate(new Date().toISOString(), occasion, itemIds);
 };
 
 export const logOutfitWearForDate = (dateIso: string, occasion: string, itemIds: string[]): LoggedWear[] => {
@@ -214,17 +220,26 @@ export const logOutfitWearForDate = (dateIso: string, occasion: string, itemIds:
     const history: LoggedWear[] = raw ? JSON.parse(raw) : getSampleInitialHistory();
 
     const targetDay = dateIso.split('T')[0];
-    // Reemplaza si ya había uno para ese día o añade uno nuevo
-    const filtered = history.filter(l => l.date.split('T')[0] !== targetDay);
+
+    // Comprobar si ya existe EXACTAMENTE este mismo conjunto en el mismo día
+    const isDuplicateOnSameDay = history.some(log => 
+      log.date.split('T')[0] === targetDay && isSameOutfitItems(log.itemIds, itemIds)
+    );
+
+    if (isDuplicateOnSameDay) {
+      // Ya está registrado este mismo outfit en este día. Evitar duplicar.
+      return history;
+    }
 
     const newLog: LoggedWear = {
-      id: 'log-' + Date.now(),
+      id: 'log-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
       date: dateIso,
       occasion,
       itemIds
     };
 
-    const updated = [newLog, ...filtered].sort(
+    // Permite múltiples outfits distintos en el mismo día
+    const updated = [newLog, ...history].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
 

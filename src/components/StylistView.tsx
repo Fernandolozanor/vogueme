@@ -26,7 +26,7 @@ import {
 import confetti from 'canvas-confetti';
 import type { ClothingItem, UserProfile, OccasionQuery, OutfitRecommendation, QuerySeason, ColorSwatch } from '../types';
 import { generateOutfitRecommendation } from '../services/stylistEngine';
-import { logOutfitWear, getOutfitHistory } from '../services/storage';
+import { logOutfitWear, getOutfitHistory, isSameOutfitItems } from '../services/storage';
 import { analyzeOutfitAgainstHistory } from '../services/repetitionEngine';
 import { GarmentDetailModal } from './GarmentDetailModal';
 import { ColorSeasonModal } from './ColorSeasonModal';
@@ -265,7 +265,7 @@ export const StylistView: React.FC<StylistViewProps> = ({
   });
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const [wornToday, setWornToday] = useState(false);
+  const [historyVersion, setHistoryVersion] = useState(0);
   
   // Modals visibility
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -293,7 +293,18 @@ export const StylistView: React.FC<StylistViewProps> = ({
     ].filter((i): i is ClothingItem => Boolean(i));
   }, [currentDress, currentTop, currentBottom, currentOuterwear, currentShoes, currentAccessory]);
 
-  const history = useMemo(() => getOutfitHistory(), [wornToday, wardrobe]);
+  const history = useMemo(() => getOutfitHistory(), [historyVersion, wardrobe]);
+
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+
+  // Determina en tiempo real si exactamente este mismo outfit ya está registrado en el día de hoy
+  const isCurrentLookWornToday = useMemo(() => {
+    const currentIds = currentOutfitItems.map(i => i.id);
+    if (currentIds.length === 0) return false;
+    return history.some(l => 
+      l.date.split('T')[0] === todayStr && isSameOutfitItems(l.itemIds, currentIds)
+    );
+  }, [history, currentOutfitItems, todayStr]);
 
   const repetitionDiagnosis = useMemo(() => {
     return analyzeOutfitAgainstHistory(currentOutfitItems, history, wardrobe);
@@ -302,7 +313,6 @@ export const StylistView: React.FC<StylistViewProps> = ({
   const handleGenerate = (closeModal = false) => {
     if (wardrobe.length === 0) return;
     setIsGenerating(true);
-    setWornToday(false);
 
     setTimeout(() => {
       try {
@@ -353,18 +363,16 @@ export const StylistView: React.FC<StylistViewProps> = ({
   };
 
   const handleWearToday = () => {
-    if (wornToday) return;
+    if (isCurrentLookWornToday) {
+      onOpenCalendar?.();
+      return;
+    }
 
-    const itemsToLog = [
-      currentDress || currentTop,
-      currentBottom,
-      currentOuterwear,
-      currentShoes,
-      currentAccessory
-    ].filter(Boolean).map(i => i!.id);
+    const itemsToLog = currentOutfitItems.map(i => i.id);
+    if (itemsToLog.length === 0) return;
 
     logOutfitWear(query.activity, itemsToLog);
-    setWornToday(true);
+    setHistoryVersion(v => v + 1);
     onRefreshWardrobe();
 
     confetti({
@@ -700,16 +708,16 @@ export const StylistView: React.FC<StylistViewProps> = ({
                 </button>
 
                 <button
-                  onClick={wornToday ? onOpenCalendar : handleWearToday}
+                  onClick={isCurrentLookWornToday ? onOpenCalendar : handleWearToday}
                   className={`py-2.5 px-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-98 ${
-                    wornToday
+                    isCurrentLookWornToday
                       ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
                       : 'bg-[#E8E1D3] hover:bg-[#DDD5C5] text-neutral-900 border border-[#D6CDBC]'
                   }`}
-                  title={wornToday ? 'Ver en el calendario de looks' : 'Registrar outfit de hoy'}
+                  title={isCurrentLookWornToday ? 'Ver en el calendario de looks' : 'Registrar este outfit en el calendario de hoy'}
                 >
-                  {wornToday ? <Calendar className="w-3.5 h-3.5" /> : <Heart className="w-3.5 h-3.5 text-rose-800 fill-rose-800" />}
-                  <span>{wornToday ? '¡Guardado! Ver Calendario' : '¡Me lo pongo!'}</span>
+                  {isCurrentLookWornToday ? <Calendar className="w-3.5 h-3.5" /> : <Heart className="w-3.5 h-3.5 text-rose-800 fill-rose-800" />}
+                  <span>{isCurrentLookWornToday ? '¡Guardado! Ver Calendario' : '¡Me lo pongo!'}</span>
                 </button>
               </div>
             </div>
@@ -963,14 +971,14 @@ export const StylistView: React.FC<StylistViewProps> = ({
           </button>
 
           <button
-            onClick={wornToday ? onOpenCalendar : handleWearToday}
+            onClick={isCurrentLookWornToday ? onOpenCalendar : handleWearToday}
             className={`py-2.5 px-2 rounded-2xl font-semibold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer shadow-sm min-w-0 truncate ${
-              wornToday ? 'bg-emerald-700 hover:bg-emerald-800 text-white' : 'bg-neutral-900 text-white'
+              isCurrentLookWornToday ? 'bg-emerald-700 hover:bg-emerald-800 text-white' : 'bg-neutral-900 text-white'
             }`}
-            title={wornToday ? 'Ver look en el calendario' : 'Registrar outfit de hoy'}
+            title={isCurrentLookWornToday ? 'Ver look en el calendario' : 'Registrar outfit de hoy'}
           >
-            {wornToday ? <Calendar className="w-3.5 h-3.5 shrink-0" /> : <Heart className="w-3.5 h-3.5 text-rose-300 fill-rose-300 shrink-0" />}
-            <span className="truncate">{wornToday ? 'Calendario' : 'Me lo pongo'}</span>
+            {isCurrentLookWornToday ? <Calendar className="w-3.5 h-3.5 shrink-0" /> : <Heart className="w-3.5 h-3.5 text-rose-300 fill-rose-300 shrink-0" />}
+            <span className="truncate">{isCurrentLookWornToday ? 'Calendario' : 'Me lo pongo'}</span>
           </button>
 
           <button
