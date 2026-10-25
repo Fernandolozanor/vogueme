@@ -1,14 +1,14 @@
 // VogueMe Service Worker - PWA Offline Caching & Instant Launch
-const CACHE_NAME = 'vogueme-pwa-v3';
+const CACHE_NAME = 'vogueme-pwa-v4';
 const STATIC_ASSETS = [
-  '/vogueme/',
-  '/vogueme/index.html',
-  '/vogueme/manifest.webmanifest',
-  '/vogueme/favicon.svg',
-  '/vogueme/icon-192.png',
-  '/vogueme/icon-512.png',
-  '/vogueme/icon-512-maskable.png',
-  '/vogueme/apple-touch-icon.png'
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './favicon.svg',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-512-maskable.png',
+  './apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (event) => {
