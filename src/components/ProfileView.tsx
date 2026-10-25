@@ -17,7 +17,9 @@ import {
   Trash2,
   RotateCcw,
   CheckCircle2,
-  HelpCircle
+  HelpCircle,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import type { UserProfile, ColorSeason, BodyShape, StyleTag, FaceShape, ColorSwatch } from '../types';
 import { ColorSeasonModal } from './ColorSeasonModal';
@@ -372,6 +374,8 @@ const STYLES_LIST: StyleTag[] = [
   'clean girl', 'old money', 'chic', 'casual', 'streetwear', 'coquette', 'elegante', 'comfy', 'fiesta'
 ];
 
+export type ProfileCardSection = 'identity' | 'facial' | 'morphology' | 'styles' | 'colorSeason';
+
 export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpdate }) => {
   const [currentProfile, setCurrentProfile] = useState<UserProfile>({
     ...profile,
@@ -382,6 +386,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
   const [scanResultNotice, setScanResultNotice] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isColorSeasonModalOpen, setIsColorSeasonModalOpen] = useState(false);
+
+  // Control de tarjetas plegadas en móvil (solo una abierta a la vez o todas plegadas)
+  const [expandedMobileSection, setExpandedMobileSection] = useState<ProfileCardSection | null>(null);
+
+  const toggleMobileSection = (section: ProfileCardSection) => {
+    setExpandedMobileSection(prev => prev === section ? null : section);
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -520,23 +531,50 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
       </div>
 
       {/* TOP SECTION: Datos Personales (Nombre, Edad, Ciudad, Ocupación) */}
-      <div className="bg-white/90 border border-[#E5DFD5] rounded-3xl p-6 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-rose-50 flex items-center justify-center text-rose-900">
+      <div className="bg-white/90 border border-[#E5DFD5] rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 transition-all">
+        <div 
+          onClick={() => toggleMobileSection('identity')}
+          className="flex items-center justify-between border-b border-neutral-100 pb-3 cursor-pointer select-none lg:cursor-default"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-full bg-rose-50 flex items-center justify-center text-rose-900 shrink-0">
               <User className="w-5 h-5" />
             </div>
-            <div>
-              <h2 className="font-serif text-xl font-bold text-neutral-900">Datos Personales & Identidad</h2>
-              <p className="text-xs text-neutral-500">Para que tu estilista IA personalice el trato y el contexto diario</p>
+            <div className="min-w-0">
+              <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 truncate">
+                Datos Personales & Identidad
+              </h2>
+              {/* Resumen Móvil */}
+              <p className="text-xs text-rose-950/80 font-medium truncate block lg:hidden">
+                {currentProfile.name || 'Tu nombre'} • {currentProfile.age ? currentProfile.age + ' años' : 'Edad no definida'} • {currentProfile.city || 'Ciudad no definida'}
+              </p>
+              <p className="text-xs text-neutral-500 hidden lg:block">
+                Para que tu estilista IA personalice el trato y el contexto diario
+              </p>
             </div>
           </div>
-          <span className="text-[10px] uppercase font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-            Privado en tu móvil
-          </span>
+          
+          <div className="flex items-center gap-2 shrink-0 ml-2">
+            <span className="hidden sm:inline-block text-[10px] uppercase font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              Privado en tu móvil
+            </span>
+
+            {/* Toggle button en móvil */}
+            <div className="lg:hidden flex items-center gap-1 text-xs font-semibold text-rose-900">
+              <span>{expandedMobileSection === 'identity' ? 'Plegar' : 'Ajustar'}</span>
+              {expandedMobileSection === 'identity' ? (
+                <ChevronUp className="w-4 h-4 text-rose-900" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-neutral-400" />
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
+        {/* Contenido (desplegable en móvil, siempre visible en desktop) */}
+        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1 ${
+          expandedMobileSection === 'identity' ? 'block' : 'hidden lg:grid'
+        }`}>
           {/* Nombre */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-600 mb-1.5 flex items-center gap-1.5">
@@ -607,23 +645,48 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
           {/* ========================================================================= */}
           {/* SECCIÓN PRINCIPAL: ANÁLISIS FACIAL COMPLETO & VISAGISMO                    */}
           {/* ========================================================================= */}
-          <div className="bg-white/95 border border-[#E5DFD5] rounded-3xl p-6 shadow-sm space-y-6">
+          <div className="bg-white/95 border border-[#E5DFD5] rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6 transition-all">
             
             {/* Header del Analizador */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-200 pb-3">
-              <div>
-                <h2 className="font-serif text-xl font-bold text-neutral-900 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-rose-900" />
-                  Análisis Facial Completo & Visagismo
-                </h2>
-                <p className="text-xs text-neutral-500 mt-0.5">
+            <div 
+              onClick={() => toggleMobileSection('facial')}
+              className="flex items-center justify-between border-b border-neutral-200 pb-3 cursor-pointer select-none lg:cursor-default"
+            >
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-rose-900 shrink-0" />
+                  <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 truncate">
+                    Análisis Facial & Visagismo
+                  </h2>
+                </div>
+                {/* Resumen Móvil */}
+                <p className="text-xs text-rose-950/80 font-medium truncate mt-0.5 block lg:hidden">
+                  Rostro {FACE_SHAPES_CONFIG[activeFaceShape]?.label || 'Ovalada'} • Contraste {currentProfile.facialContrast || 'medio'} • Piel {currentProfile.skinTone} ({currentProfile.skinUndertone})
+                </p>
+                <p className="text-xs text-neutral-500 mt-0.5 hidden lg:block">
                   Fisonomía, forma de rostro, ojos y contraste • 100% configurable
                 </p>
               </div>
-              <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 self-start sm:self-auto">
-                100% En Dispositivo
-              </span>
+
+              <div className="flex items-center gap-2 shrink-0 ml-2">
+                <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                  100% En Dispositivo
+                </span>
+
+                {/* Toggle button en móvil */}
+                <div className="lg:hidden flex items-center gap-1 text-xs font-semibold text-rose-900">
+                  <span>{expandedMobileSection === 'facial' ? 'Plegar' : 'Ajustar'}</span>
+                  {expandedMobileSection === 'facial' ? (
+                    <ChevronUp className="w-4 h-4 text-rose-900" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-neutral-400" />
+                  )}
+                </div>
+              </div>
             </div>
+
+            {/* Contenido (desplegable en móvil, siempre visible en desktop) */}
+            <div className={`space-y-6 ${expandedMobileSection === 'facial' ? 'block' : 'hidden lg:block'}`}>
 
             {/* Escáner de Selfie con IA Local & Comparativa de Foto Guardada */}
             <input
@@ -1053,6 +1116,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
               </div>
             </div>
 
+            {/* Fin contenido condicional móvil Card 2 */}
+            </div>
+
           </div>
 
         </div>
@@ -1061,14 +1127,39 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
         <div className="lg:col-span-6 space-y-6">
           
           {/* Body Shape & Measurements Box */}
-          <div className="bg-white/80 border border-[#E5DFD5] rounded-3xl p-6 shadow-sm space-y-5">
-            <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
-              <h2 className="font-serif text-xl font-bold text-neutral-900 flex items-center gap-2">
-                <Ruler className="w-5 h-5 text-rose-900" />
-                Morfología & Medidas
-              </h2>
-              <span className="text-xs text-neutral-400">100% Confidencial</span>
+          <div className="bg-white/80 border border-[#E5DFD5] rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5 transition-all">
+            <div 
+              onClick={() => toggleMobileSection('morphology')}
+              className="flex items-center justify-between border-b border-neutral-200 pb-3 cursor-pointer select-none lg:cursor-default"
+            >
+              <div className="min-w-0 flex-1">
+                <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 flex items-center gap-2 truncate">
+                  <Ruler className="w-5 h-5 text-rose-900 shrink-0" />
+                  Morfología & Medidas
+                </h2>
+                {/* Resumen Móvil */}
+                <p className="text-xs text-rose-950/80 font-medium truncate mt-0.5 block lg:hidden">
+                  {BODY_SHAPES_INFO[currentProfile.bodyShape]?.label || 'Reloj de Arena'} • {currentProfile.heightCm || 165} cm • ({currentProfile.chestCm || 88}-{currentProfile.waistCm || 65}-{currentProfile.hipsCm || 94} cm)
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0 ml-2">
+                <span className="hidden sm:inline-block text-xs text-neutral-400">100% Confidencial</span>
+                
+                {/* Toggle button en móvil */}
+                <div className="lg:hidden flex items-center gap-1 text-xs font-semibold text-rose-900">
+                  <span>{expandedMobileSection === 'morphology' ? 'Plegar' : 'Ajustar'}</span>
+                  {expandedMobileSection === 'morphology' ? (
+                    <ChevronUp className="w-4 h-4 text-rose-900" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-neutral-400" />
+                  )}
+                </div>
+              </div>
             </div>
+
+            {/* Contenido (desplegable en móvil, siempre visible en desktop) */}
+            <div className={`space-y-5 ${expandedMobileSection === 'morphology' ? 'block' : 'hidden lg:block'}`}>
 
             {/* Silhouette Selector */}
             <div>
@@ -1157,50 +1248,120 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                 </div>
               </div>
             </div>
+
+            {/* Fin contenido condicional móvil Card 3 */}
+            </div>
+
           </div>
 
           {/* Style Preferences & Vibes */}
-          <div className="bg-white/80 border border-[#E5DFD5] rounded-3xl p-6 shadow-sm space-y-4">
-            <h2 className="font-serif text-xl font-bold text-neutral-900">
-              Estilos & Vibes Predilectos
-            </h2>
-            <p className="text-xs text-neutral-500">
-              Selecciona los estilos con los que más te identificas para priorizar recomendaciones afines:
-            </p>
+          <div className="bg-white/80 border border-[#E5DFD5] rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 transition-all">
+            <div 
+              onClick={() => toggleMobileSection('styles')}
+              className="flex items-center justify-between border-b border-neutral-100 pb-3 cursor-pointer select-none lg:cursor-default"
+            >
+              <div className="min-w-0 flex-1">
+                <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 truncate">
+                  Estilos & Vibes Predilectos
+                </h2>
+                {/* Resumen Móvil */}
+                <p className="text-xs text-rose-950/80 font-medium truncate mt-0.5 block lg:hidden">
+                  {currentProfile.preferredStyles.length > 0 
+                    ? currentProfile.preferredStyles.map(s => '#' + s).join(', ') 
+                    : 'Ningún estilo seleccionado'}
+                </p>
+                <p className="text-xs text-neutral-500 hidden lg:block">
+                  Selecciona los estilos con los que más te identificas para priorizar recomendaciones afines
+                </p>
+              </div>
 
-            <div className="flex flex-wrap gap-2">
-              {STYLES_LIST.map((style) => {
-                const isSelected = currentProfile.preferredStyles.includes(style);
-                return (
-                  <button
-                    key={style}
-                    onClick={() => toggleStyle(style)}
-                    className={`py-1.5 px-3 rounded-full text-xs font-medium border transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-neutral-900 text-white border-neutral-900 shadow-2xs font-semibold'
-                        : 'bg-[#FAF8F5] text-neutral-600 border-neutral-200 hover:bg-[#EAE4D8]'
-                    }`}
-                  >
-                    #{style}
-                  </button>
-                );
-              })}
+              <div className="lg:hidden flex items-center gap-1 text-xs font-semibold text-rose-900 shrink-0 ml-2">
+                <span>{expandedMobileSection === 'styles' ? 'Plegar' : 'Ajustar'}</span>
+                {expandedMobileSection === 'styles' ? (
+                  <ChevronUp className="w-4 h-4 text-rose-900" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-neutral-400" />
+                )}
+              </div>
+            </div>
+
+            {/* Contenido (desplegable en móvil, siempre visible en desktop) */}
+            <div className={`space-y-4 ${expandedMobileSection === 'styles' ? 'block' : 'hidden lg:block'}`}>
+              <div className="flex flex-wrap gap-2">
+                {STYLES_LIST.map((style) => {
+                  const isSelected = currentProfile.preferredStyles.includes(style);
+                  return (
+                    <button
+                      key={style}
+                      onClick={() => toggleStyle(style)}
+                      className={`py-1.5 px-3 rounded-full text-xs font-medium border transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-neutral-900 text-white border-neutral-900 shadow-2xs font-semibold'
+                          : 'bg-[#FAF8F5] text-neutral-600 border-neutral-200 hover:bg-[#EAE4D8]'
+                      }`}
+                    >
+                      #{style}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
           {/* Color Season Selector & Harmonizer */}
-          <div className="bg-[#FAF8F5] border border-[#E2DBD0] rounded-3xl p-5 sm:p-6 shadow-sm space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-neutral-200 pb-3">
-              <div className="flex items-center gap-2">
-                <Palette className="w-5 h-5 text-rose-900 shrink-0" />
-                <h2 className="font-serif text-xl font-bold text-neutral-900">
-                  Tu Estación Cromática
-                </h2>
+          <div className="bg-[#FAF8F5] border border-[#E2DBD0] rounded-3xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5 transition-all">
+            <div 
+              onClick={() => toggleMobileSection('colorSeason')}
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-neutral-200 pb-3 cursor-pointer select-none lg:cursor-default"
+            >
+              <div className="flex items-center justify-between w-full lg:w-auto">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <Palette className="w-5 h-5 text-rose-900 shrink-0" />
+                    <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 truncate">
+                      Tu Estación Cromática
+                    </h2>
+                  </div>
+                  {/* Resumen Móvil */}
+                  <p className="text-xs text-rose-950/80 font-medium truncate mt-0.5 block lg:hidden">
+                    Paleta {currentProfile.colorSeason}
+                  </p>
+                </div>
+
+                {/* Mobile action buttons & chevron */}
+                <div className="lg:hidden flex items-center gap-2 shrink-0 ml-2">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsColorSeasonModalOpen(true);
+                    }}
+                    className="px-2 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-950 border border-rose-200/90 text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+                    title="Ver explicación completa de cómo funciona la colorimetría"
+                  >
+                    <HelpCircle className="w-3 h-3 text-rose-900" />
+                    <span>Ayuda</span>
+                  </button>
+
+                  <div className="flex items-center gap-1 text-xs font-semibold text-rose-900">
+                    <span>{expandedMobileSection === 'colorSeason' ? 'Plegar' : 'Ajustar'}</span>
+                    {expandedMobileSection === 'colorSeason' ? (
+                      <ChevronUp className="w-4 h-4 text-rose-900" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-neutral-400" />
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
+
+              {/* Desktop action buttons */}
+              <div className="hidden lg:flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setIsColorSeasonModalOpen(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsColorSeasonModalOpen(true);
+                  }}
                   className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-950 border border-rose-200/90 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs"
                   title="Ver explicación completa de cómo funciona la colorimetría"
                 >
@@ -1212,6 +1373,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                 </span>
               </div>
             </div>
+
+            {/* Contenido (desplegable en móvil, siempre visible en desktop) */}
+            <div className={`space-y-5 ${expandedMobileSection === 'colorSeason' ? 'block' : 'hidden lg:block'}`}>
 
             {/* Banner explicativo rápido */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white/80 p-3.5 rounded-2xl border border-neutral-200 text-xs">
@@ -1318,6 +1482,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                 ))}
               </div>
             </div>
+
+            {/* Fin contenido condicional móvil Card 5 */}
+            </div>
+
           </div>
 
         </div>
