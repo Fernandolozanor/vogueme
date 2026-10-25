@@ -88,14 +88,29 @@ const HAIR_COLORS_PRESETS = [
   { label: 'Pelirrojo / Cobrizo cálido', hex: '#B3541E' }
 ];
 
+export const COLOR_HARMONIES_LIST: ColorSeason[] = [
+  'Cálida Luminosa',
+  'Cálida Dorada',
+  'Cálida Vibrante',
+  'Cálida Suave',
+  'Cálida Terrosa',
+  'Cálida Profunda',
+  'Fría Clara',
+  'Fría Empolvada',
+  'Fría Serena',
+  'Fría Cristalina',
+  'Fría Intensa',
+  'Fría Profunda'
+];
+
 const COLOR_SEASONS_INFO: Record<ColorSeason, { 
   description: string; 
   bestColors: ColorSwatch[]; 
   faceRecommendedColors: ColorSwatch[];
   avoidColors: ColorSwatch[]; 
 }> = {
-  'Otoño Suave': {
-    description: 'Tonos tierra cálidos, apagados y aterciopelados. El beige, camel, terracota, oliva y marrón chocolate potencian tu luminosidad.',
+  'Cálida Suave': {
+    description: 'Tonos tierra cálidos, apagados y aterciopelados. El beige arena, camel, terracota suave, oliva y marrón chocolate potencian tu luminosidad.',
     bestColors: [
       { name: 'Beige arena', hex: '#D8C7B5' },
       { name: 'Terracota suave', hex: '#C3684B' },
@@ -115,8 +130,8 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, {
       { name: 'Fucsia flúor', hex: '#FF00FF' }
     ]
   },
-  'Otoño Cálido': {
-    description: 'Colores otoñales ricos y dorados. Mostaza, teja, caldera, verde bosque y tonos bronce.',
+  'Cálida Terrosa': {
+    description: 'Colores cálidos ricos y tostados. Mostaza dorada, teja, caldera, verde bosque y tonos bronce.',
     bestColors: [
       { name: 'Mostaza dorada', hex: '#C5A059' },
       { name: 'Caldera / Teja', hex: '#B3541E' },
@@ -136,8 +151,8 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, {
       { name: 'Lila pastel', hex: '#E1BEE7' }
     ]
   },
-  'Otoño Profundo': {
-    description: 'Colores intensos, cálidos y profundos. Granate, verde petróleo, cacao y café oscuro.',
+  'Cálida Profunda': {
+    description: 'Colores intensos, cálidos y profundos. Granate vino, verde petróleo, cacao y café oscuro.',
     bestColors: [
       { name: 'Granate vino', hex: '#4A0E17' },
       { name: 'Verde petróleo', hex: '#1B3B36' },
@@ -157,70 +172,7 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, {
       { name: 'Rosa bebé', hex: '#FCE7F3' }
     ]
   },
-  'Invierno Frío': {
-    description: 'Contraste frío y puro. Blanco nuclear, negro absoluto, azul marino profundo, rubí y magenta.',
-    bestColors: [
-      { name: 'Blanco puro', hex: '#FFFFFF' },
-      { name: 'Negro azabache', hex: '#0A0A0A' },
-      { name: 'Azul marino frío', hex: '#1E3A8A' },
-      { name: 'Rojo rubí', hex: '#BE123C' },
-      { name: 'Púrpura real', hex: '#701A75' }
-    ],
-    faceRecommendedColors: [
-      { name: 'Blanco nuclear puro', hex: '#FFFFFF' },
-      { name: 'Rojo rubí frío', hex: '#BE123C' },
-      { name: 'Azul marino noche', hex: '#1E3A8A' },
-      { name: 'Plata brillante', hex: '#E2E8F0' }
-    ],
-    avoidColors: [
-      { name: 'Naranja tostado', hex: '#D97706' },
-      { name: 'Teja cálido', hex: '#B45309' },
-      { name: 'Mostaza dorada', hex: '#CA8A04' }
-    ]
-  },
-  'Invierno Brillante': {
-    description: 'Colores vibrantes, joya y de alto impacto con base fría: zafiro, fucsia eléctrico, esmeralda y blanco puro.',
-    bestColors: [
-      { name: 'Azul cobalto', hex: '#2563EB' },
-      { name: 'Fucsia eléctrico', hex: '#EC4899' },
-      { name: 'Esmeralda puro', hex: '#059669' },
-      { name: 'Blanco nuclear', hex: '#FFFFFF' },
-      { name: 'Negro noche', hex: '#0F172A' }
-    ],
-    faceRecommendedColors: [
-      { name: 'Blanco hielo', hex: '#F8FAFC' },
-      { name: 'Fucsia eléctrico', hex: '#EC4899' },
-      { name: 'Azul cobalto zafiro', hex: '#2563EB' },
-      { name: 'Plata pulida', hex: '#CBD5E1' }
-    ],
-    avoidColors: [
-      { name: 'Ocre mostaza', hex: '#D97706' },
-      { name: 'Marrón barro', hex: '#92400E' },
-      { name: 'Camel apagado', hex: '#78350F' }
-    ]
-  },
-  'Invierno Profundo': {
-    description: 'Tonos oscuros y penetrantes: cereza oscuro, berenjena, carbón y azul noche.',
-    bestColors: [
-      { name: 'Cereza oscuro', hex: '#450A0A' },
-      { name: 'Berenjena intenso', hex: '#3B0764' },
-      { name: 'Gris carbón', hex: '#1E293B' },
-      { name: 'Magenta oscuro', hex: '#831843' },
-      { name: 'Azul noche', hex: '#0F172A' }
-    ],
-    faceRecommendedColors: [
-      { name: 'Blanco nieve', hex: '#F1F5F9' },
-      { name: 'Cereza oscuro', hex: '#450A0A' },
-      { name: 'Berenjena real', hex: '#3B0764' },
-      { name: 'Plata oscura / Platino', hex: '#94A3B8' }
-    ],
-    avoidColors: [
-      { name: 'Amarillo suave', hex: '#FEF08A' },
-      { name: 'Melocotón pastel', hex: '#FED7AA' },
-      { name: 'Vainilla pálido', hex: '#FDE68A' }
-    ]
-  },
-  'Primavera Clara': {
+  'Cálida Luminosa': {
     description: 'Tonos pastel cálidos, luminosos y frescos: melocotón, aguamarina, coral suave y marfil.',
     bestColors: [
       { name: 'Melocotón suave', hex: '#FED7AA' },
@@ -241,8 +193,8 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, {
       { name: 'Azul tinta', hex: '#111827' }
     ]
   },
-  'Primavera Cálida': {
-    description: 'Colores dorados, vivos y radiantes: coral, turquesa cálido, verde lima y amarillo mantequilla.',
+  'Cálida Dorada': {
+    description: 'Colores dorados, vivos y radiantes: coral vibrante, turquesa cálido, verde lima y amarillo mantequilla.',
     bestColors: [
       { name: 'Coral vibrante', hex: '#FB923C' },
       { name: 'Turquesa cálido', hex: '#2DD4BF' },
@@ -262,8 +214,8 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, {
       { name: 'Gris plomo', hex: '#64748B' }
     ]
   },
-  'Primavera Brillante': {
-    description: 'Colores vivos, alegres y cristalinos: rojo amapola, fucsia cálido y verde manzana.',
+  'Cálida Vibrante': {
+    description: 'Colores vivos, alegres y cristalinos: rojo amapola, fucsia cálido, esmeralda y ámbar.',
     bestColors: [
       { name: 'Rojo amapola', hex: '#EF4444' },
       { name: 'Sandía brillante', hex: '#F43F5E' },
@@ -283,8 +235,8 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, {
       { name: 'Marrón ceniza', hex: '#3F3F46' }
     ]
   },
-  'Verano Claro': {
-    description: 'Tonos suaves, fríos y empolvados: rosa bebé, azul cielo, lavanda y gris perla.',
+  'Fría Clara': {
+    description: 'Tonos suaves, fríos y empolvados: rosa pastel, azul cielo, lavanda y gris perla.',
     bestColors: [
       { name: 'Rosa pastel', hex: '#FBCFE8' },
       { name: 'Azul cielo', hex: '#BAE6FD' },
@@ -304,7 +256,7 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, {
       { name: 'Naranja teja', hex: '#EA580C' }
     ]
   },
-  'Verano Suave': {
+  'Fría Empolvada': {
     description: 'Tonos neutros fríos y empolvados: malva, verde salvia apagado, azul acero y rosa ceniza.',
     bestColors: [
       { name: 'Malva empolvado', hex: '#C084FC' },
@@ -325,8 +277,8 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, {
       { name: 'Amarillo dorado', hex: '#EAB308' }
     ]
   },
-  'Verano Frío': {
-    description: 'Azules gélidos, frambuesa, gris azulado y rosa frío.',
+  'Fría Serena': {
+    description: 'Azules gélidos, frambuesa, gris azulado y rosa frío de intensidad media.',
     bestColors: [
       { name: 'Azul hielo', hex: '#38BDF8' },
       { name: 'Frambuesa frío', hex: '#BE185D' },
@@ -345,8 +297,99 @@ const COLOR_SEASONS_INFO: Record<ColorSeason, {
       { name: 'Mostaza cálida', hex: '#CA8A04' },
       { name: 'Calabaza / Óxido', hex: '#D97706' }
     ]
-  }
+  },
+  'Fría Cristalina': {
+    description: 'Colores vibrantes, joya y de alto impacto con base fría: zafiro, fucsia eléctrico, esmeralda y blanco puro.',
+    bestColors: [
+      { name: 'Azul cobalto', hex: '#2563EB' },
+      { name: 'Fucsia eléctrico', hex: '#EC4899' },
+      { name: 'Esmeralda puro', hex: '#059669' },
+      { name: 'Blanco nuclear', hex: '#FFFFFF' },
+      { name: 'Negro noche', hex: '#0F172A' }
+    ],
+    faceRecommendedColors: [
+      { name: 'Blanco hielo', hex: '#F8FAFC' },
+      { name: 'Fucsia eléctrico', hex: '#EC4899' },
+      { name: 'Azul cobalto zafiro', hex: '#2563EB' },
+      { name: 'Plata pulida', hex: '#CBD5E1' }
+    ],
+    avoidColors: [
+      { name: 'Ocre mostaza', hex: '#D97706' },
+      { name: 'Marrón barro', hex: '#92400E' },
+      { name: 'Camel apagado', hex: '#78350F' }
+    ]
+  },
+  'Fría Intensa': {
+    description: 'Contraste frío y puro. Blanco nuclear, negro azabache, azul marino profundo, rubí y magenta.',
+    bestColors: [
+      { name: 'Blanco puro', hex: '#FFFFFF' },
+      { name: 'Negro azabache', hex: '#0A0A0A' },
+      { name: 'Azul marino frío', hex: '#1E3A8A' },
+      { name: 'Rojo rubí', hex: '#BE123C' },
+      { name: 'Púrpura real', hex: '#701A75' }
+    ],
+    faceRecommendedColors: [
+      { name: 'Blanco nuclear puro', hex: '#FFFFFF' },
+      { name: 'Rojo rubí frío', hex: '#BE123C' },
+      { name: 'Azul marino noche', hex: '#1E3A8A' },
+      { name: 'Plata brillante', hex: '#E2E8F0' }
+    ],
+    avoidColors: [
+      { name: 'Naranja tostado', hex: '#D97706' },
+      { name: 'Teja cálido', hex: '#B45309' },
+      { name: 'Mostaza dorada', hex: '#CA8A04' }
+    ]
+  },
+  'Fría Profunda': {
+    description: 'Tonos oscuros y penetrantes con base fría: cereza oscuro, berenjena, carbón y azul noche.',
+    bestColors: [
+      { name: 'Cereza oscuro', hex: '#450A0A' },
+      { name: 'Berenjena intenso', hex: '#3B0764' },
+      { name: 'Gris carbón', hex: '#1E293B' },
+      { name: 'Magenta oscuro', hex: '#831843' },
+      { name: 'Azul noche', hex: '#0F172A' }
+    ],
+    faceRecommendedColors: [
+      { name: 'Blanco nieve', hex: '#F1F5F9' },
+      { name: 'Cereza oscuro', hex: '#450A0A' },
+      { name: 'Berenjena real', hex: '#3B0764' },
+      { name: 'Plata oscura / Platino', hex: '#94A3B8' }
+    ],
+    avoidColors: [
+      { name: 'Amarillo suave', hex: '#FEF08A' },
+      { name: 'Melocotón pastel', hex: '#FED7AA' },
+      { name: 'Vainilla pálido', hex: '#FDE68A' }
+    ]
+  },
+
+  // Alias heredados para retrocompatibilidad total:
+  'Otoño Suave': null as any,
+  'Otoño Cálido': null as any,
+  'Otoño Profundo': null as any,
+  'Primavera Clara': null as any,
+  'Primavera Cálida': null as any,
+  'Primavera Brillante': null as any,
+  'Verano Claro': null as any,
+  'Verano Suave': null as any,
+  'Verano Frío': null as any,
+  'Invierno Brillante': null as any,
+  'Invierno Frío': null as any,
+  'Invierno Profundo': null as any
 };
+
+// Vinculación de alias heredados:
+COLOR_SEASONS_INFO['Otoño Suave'] = COLOR_SEASONS_INFO['Cálida Suave'];
+COLOR_SEASONS_INFO['Otoño Cálido'] = COLOR_SEASONS_INFO['Cálida Terrosa'];
+COLOR_SEASONS_INFO['Otoño Profundo'] = COLOR_SEASONS_INFO['Cálida Profunda'];
+COLOR_SEASONS_INFO['Primavera Clara'] = COLOR_SEASONS_INFO['Cálida Luminosa'];
+COLOR_SEASONS_INFO['Primavera Cálida'] = COLOR_SEASONS_INFO['Cálida Dorada'];
+COLOR_SEASONS_INFO['Primavera Brillante'] = COLOR_SEASONS_INFO['Cálida Vibrante'];
+COLOR_SEASONS_INFO['Verano Claro'] = COLOR_SEASONS_INFO['Fría Clara'];
+COLOR_SEASONS_INFO['Verano Suave'] = COLOR_SEASONS_INFO['Fría Empolvada'];
+COLOR_SEASONS_INFO['Verano Frío'] = COLOR_SEASONS_INFO['Fría Serena'];
+COLOR_SEASONS_INFO['Invierno Brillante'] = COLOR_SEASONS_INFO['Fría Cristalina'];
+COLOR_SEASONS_INFO['Invierno Frío'] = COLOR_SEASONS_INFO['Fría Intensa'];
+COLOR_SEASONS_INFO['Invierno Profundo'] = COLOR_SEASONS_INFO['Fría Profunda'];
 
 const BODY_SHAPES_INFO: Record<BodyShape, { label: string; tip: string }> = {
   'reloj_de_arena': {
@@ -483,7 +526,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
     const updated: UserProfile = { ...currentProfile, ...patch };
 
     // Si se modifica una variable fisonómica y no se está forzando manualmente colorSeason,
-    // recalculamos en tiempo real la estación cromática idónea:
+    // recalculamos en tiempo real la armonía cromática idónea:
     if (affectsSeason && !('colorSeason' in patch)) {
       const newSeason = calculateColorSeason({
         skinUndertone: updated.skinUndertone,
@@ -515,7 +558,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
     setCurrentProfile({ ...currentProfile, preferredStyles: updated });
   };
 
-  const currentSeasonData = COLOR_SEASONS_INFO[currentProfile.colorSeason] || COLOR_SEASONS_INFO['Otoño Suave'];
+  const currentSeasonData = COLOR_SEASONS_INFO[currentProfile.colorSeason] || COLOR_SEASONS_INFO['Cálida Suave'];
   const activeFaceShape: FaceShape = currentProfile.faceShape || 'ovalada';
   const faceShapeInfo = FACE_SHAPES_CONFIG[activeFaceShape] || FACE_SHAPES_CONFIG.ovalada;
 
@@ -1103,12 +1146,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
               </div>
             </div>
 
-            {/* Estación Cromática recalculada en vivo según las 4 variables */}
+            {/* Armonía Cromática recalculada en vivo según las 4 variables */}
             <div className="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-3 flex items-center justify-between gap-2.5 transition-all">
               <div className="flex items-center gap-2.5 min-w-0">
                 <Palette className="w-4 h-4 text-rose-900 shrink-0" />
                 <div className="min-w-0">
-                  <span className="text-[10.5px] text-neutral-500 block leading-tight">Estación cromática calibrada:</span>
+                  <span className="text-[10.5px] text-neutral-500 block leading-tight">Armonía cromática calibrada:</span>
                   <strong className="text-xs sm:text-sm text-rose-950 font-bold block truncate">{currentProfile.colorSeason}</strong>
                 </div>
               </div>
@@ -1343,7 +1386,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
             </div>
           </div>
 
-          {/* Color Season Selector & Harmonizer */}
+          {/* Armonía Cromática Personal & Harmonizer */}
           <div className="bg-[#FAF8F5] border border-[#E2DBD0] rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-2xs space-y-2 sm:space-y-5 transition-all">
             <div 
               onClick={() => toggleMobileSection('colorSeason')}
@@ -1354,12 +1397,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <Palette className="w-4 h-4 sm:w-5 sm:h-5 text-rose-900 shrink-0" />
                     <h2 className="font-serif text-xs sm:text-xl font-bold text-neutral-900 leading-tight">
-                      Tu Estación Cromática
+                      Armonía Cromática Personal
                     </h2>
                   </div>
                   {/* Resumen Móvil */}
                   <p className="text-[10.5px] sm:text-xs text-rose-950/80 font-medium truncate block lg:hidden mt-0.5">
-                    Paleta {currentProfile.colorSeason}
+                    Armonía {currentProfile.colorSeason}
                   </p>
                 </div>
 
@@ -1372,7 +1415,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                       setIsColorSeasonModalOpen(true);
                     }}
                     className="px-2 py-0.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-950 border border-rose-200/90 text-[10px] font-semibold flex items-center gap-1 cursor-pointer shrink-0"
-                    title="Ver explicación completa de cómo funciona la colorimetría"
+                    title="Ver explicación completa de cómo funciona la armonía cromática"
                   >
                     <HelpCircle className="w-3 h-3 text-rose-900" />
                     <span>Ayuda</span>
@@ -1398,7 +1441,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                     setIsColorSeasonModalOpen(true);
                   }}
                   className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-950 border border-rose-200/90 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs"
-                  title="Ver explicación completa de cómo funciona la colorimetría"
+                  title="Ver explicación completa de cómo funciona la armonía cromática"
                 >
                   <HelpCircle className="w-3.5 h-3.5 text-rose-900" />
                   <span>¿Cómo funciona?</span>
@@ -1429,15 +1472,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-600 mb-2">
-                Seleccionar o ajustar tu estación:
+                Seleccionar o ajustar tu armonía cromática:
               </label>
               <select
                 value={currentProfile.colorSeason}
                 onChange={(e) => updateFacialFeature({ colorSeason: e.target.value as ColorSeason })}
                 className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-neutral-300 bg-white focus:outline-none focus:ring-1 focus:ring-neutral-800 cursor-pointer font-medium"
               >
-                {Object.keys(COLOR_SEASONS_INFO).map((season) => (
-                  <option key={season} value={season}>{season}</option>
+                {COLOR_HARMONIES_LIST.map((harmony) => (
+                  <option key={harmony} value={harmony}>{harmony}</option>
                 ))}
               </select>
             </div>
@@ -1527,7 +1570,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
 
       </div>
 
-      {/* Ventana Emergente Educativa: ¿Cómo funciona la Estación Cromática? */}
+      {/* Ventana Emergente Educativa: ¿Cómo funciona la Armonía Cromática? */}
       <ColorSeasonModal
         isOpen={isColorSeasonModalOpen}
         onClose={() => setIsColorSeasonModalOpen(false)}

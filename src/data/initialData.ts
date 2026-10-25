@@ -5,7 +5,7 @@ export const INITIAL_USER_PROFILE: UserProfile = {
   age: 21,
   city: 'Madrid',
   occupation: 'Estudiante universitaria',
-  colorSeason: 'Otoño Suave',
+  colorSeason: 'Cálida Suave',
   skinTone: 'claro',
   skinUndertone: 'calido',
   hairColor: 'Castaño iluminado / Avellana',

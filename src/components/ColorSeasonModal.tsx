@@ -19,7 +19,7 @@ interface ColorSeasonModalProps {
   currentSeason?: ColorSeason;
 }
 
-const SEASONS_SUMMARY: Record<string, {
+const HARMONIES_SUMMARY: Record<string, {
   name: string;
   family: string;
   temp: 'Cálido' | 'Frío';
@@ -29,9 +29,9 @@ const SEASONS_SUMMARY: Record<string, {
   sampleColors: ColorSwatch[];
   icon: string;
 }> = {
-  'Primavera': {
-    name: 'Primavera',
-    family: 'Cálida & Luminosa',
+  'Cálida Luminosa': {
+    name: 'Cálida Luminosa',
+    family: 'Cálida & Radiante',
     temp: 'Cálido',
     depth: 'Claro',
     contrast: 'Brillante',
@@ -43,11 +43,11 @@ const SEASONS_SUMMARY: Record<string, {
       { name: 'Amarillo oro', hex: '#FACC15' },
       { name: 'Naranja amapola', hex: '#EA580C' }
     ],
-    icon: '🌸'
+    icon: '✨'
   },
-  'Verano': {
-    name: 'Verano',
-    family: 'Fría & Empolvada',
+  'Fría Empolvada': {
+    name: 'Fría Empolvada',
+    family: 'Fría & Aterciopelada',
     temp: 'Frío',
     depth: 'Claro',
     contrast: 'Suave',
@@ -59,10 +59,10 @@ const SEASONS_SUMMARY: Record<string, {
       { name: 'Azul bebé', hex: '#93C5FD' },
       { name: 'Gris perla', hex: '#94A3B8' }
     ],
-    icon: '☀️'
+    icon: '🪞'
   },
-  'Otoño': {
-    name: 'Otoño',
+  'Cálida Terrosa': {
+    name: 'Cálida Terrosa',
     family: 'Cálida & Envolvente',
     temp: 'Cálido',
     depth: 'Profundo',
@@ -75,10 +75,10 @@ const SEASONS_SUMMARY: Record<string, {
       { name: 'Verde oliva', hex: '#708238' },
       { name: 'Mostaza dorada', hex: '#C5A059' }
     ],
-    icon: '🍂'
+    icon: '🏺'
   },
-  'Invierno': {
-    name: 'Invierno',
+  'Fría Intensa': {
+    name: 'Fría Intensa',
     family: 'Fría & Contraste Puro',
     temp: 'Frío',
     depth: 'Profundo',
@@ -91,7 +91,7 @@ const SEASONS_SUMMARY: Record<string, {
       { name: 'Rojo rubí', hex: '#BE123C' },
       { name: 'Azul cobalto', hex: '#2563EB' }
     ],
-    icon: '❄️'
+    icon: '💎'
   }
 };
 
@@ -116,13 +116,13 @@ export const ColorSeasonModal: React.FC<ColorSeasonModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Determine which main season category the user belongs to
-  const activeMainSeason = currentSeason
-    ? currentSeason.includes('Primavera') ? 'Primavera'
-      : currentSeason.includes('Verano') ? 'Verano'
-      : currentSeason.includes('Otoño') ? 'Otoño'
-      : 'Invierno'
-    : 'Otoño';
+  // Determinar a qué familia cromática principal pertenece la persona
+  const activeMainFamily = currentSeason
+    ? (currentSeason.includes('Luminosa') || currentSeason.includes('Dorada') || currentSeason.includes('Vibrante') || currentSeason.includes('Primavera')) ? 'Cálida Luminosa'
+      : (currentSeason.includes('Empolvada') || currentSeason.includes('Serena') || (currentSeason.includes('Clara') && currentSeason.includes('Fría')) || currentSeason.includes('Verano')) ? 'Fría Empolvada'
+      : (currentSeason.includes('Terrosa') || (currentSeason.includes('Suave') && currentSeason.includes('Cálida')) || (currentSeason.includes('Profunda') && currentSeason.includes('Cálida')) || currentSeason.includes('Otoño')) ? 'Cálida Terrosa'
+      : 'Fría Intensa'
+    : 'Cálida Terrosa';
 
   return typeof document !== 'undefined' ? createPortal(
     <div 
@@ -141,10 +141,10 @@ export const ColorSeasonModal: React.FC<ColorSeasonModalProps> = ({
             </div>
             <div className="min-w-0">
               <h2 className="font-serif text-lg sm:text-xl font-bold text-neutral-900 truncate">
-                ¿Cómo funciona la Colorimetría?
+                ¿Cómo funciona la Armonía Cromática?
               </h2>
               <span className="text-[11px] text-neutral-500 block truncate">
-                Guía de Estaciones Cromáticas & Armonía Personal
+                Guía de Armonías Cromáticas Personales & Colorimetría Facial
               </span>
             </div>
           </div>
@@ -165,13 +165,13 @@ export const ColorSeasonModal: React.FC<ColorSeasonModalProps> = ({
           <div className="bg-white p-4 sm:p-5 rounded-2xl border border-neutral-200/90 shadow-2xs space-y-2.5">
             <div className="flex items-center gap-2 text-rose-900 font-bold text-xs uppercase tracking-wider">
               <Sparkles className="w-4 h-4 text-rose-900" />
-              <span>El Efecto "Buena Cara" Inmediato</span>
+              <span>Tu Paleta Biológica Permanente (Los 365 días del año)</span>
             </div>
             <p className="text-neutral-700 leading-relaxed">
-              La <strong>colorimetría estacional</strong> es la ciencia que estudia cómo los pigmentos naturales de tu <strong>piel, ojos y cabello</strong> reaccionan con la luz que reflejan las prendas que vistes cerca del rostro.
+              La <strong>Armonía Cromática Personal</strong> estudia cómo los pigmentos naturales de tu <strong>piel, ojos y cabello</strong> reaccionan con la luz que reflejan los colores que vistes cerca del rostro.
             </p>
             <p className="text-neutral-600 leading-relaxed">
-              Cuando vistes los colores de tu estación cromática adecuada, tu rostro se ilumina naturalmente, se difuminan las ojeras y pequeñas líneas, y tu mirada gana brillo sin necesidad de maquillaje. Por el contrario, un color inadecuado puede apagar tu tono o proyectar sombras grisáceas o cetrinas.
+              <strong>No cambia con el calendario ni con el clima:</strong> si tu armonía es <em>Cálida Terrosa</em>, lo es en enero y en agosto. Determina qué matices hacen que tu piel se vea luminosa y descansada, independientemente de que vistas una prenda ligera de verano o un abrigo de lana en invierno.
             </p>
           </div>
 
@@ -179,7 +179,7 @@ export const ColorSeasonModal: React.FC<ColorSeasonModalProps> = ({
           <div className="space-y-3">
             <h3 className="font-serif text-base sm:text-lg font-bold text-neutral-900 flex items-center gap-2">
               <HelpCircle className="w-4 h-4 text-amber-700" />
-              Los 3 Pilares que definen tu Estación
+              Los 3 Pilares que definen tu Armonía
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -194,14 +194,14 @@ export const ColorSeasonModal: React.FC<ColorSeasonModalProps> = ({
                 </p>
               </div>
 
-              {/* Pilar 2: Claridad / Valor */}
+              {/* Pilar 2: Claridad / Profundidad */}
               <div className="bg-white p-3.5 rounded-2xl border border-neutral-200/90 space-y-1.5 shadow-2xs">
                 <div className="w-7 h-7 rounded-xl bg-blue-50 text-blue-800 flex items-center justify-center font-bold text-xs">
                   <Sun className="w-4 h-4 text-blue-700" />
                 </div>
-                <h4 className="font-semibold text-neutral-900 text-xs">2. Claridad (Valor)</h4>
+                <h4 className="font-semibold text-neutral-900 text-xs">2. Claridad / Profundidad</h4>
                 <p className="text-[11px] text-neutral-600 leading-snug">
-                  <strong>Claro vs. Profundo:</strong> El grado de luz natural que predomina en tu cabello, ojos y tez.
+                  <strong>Luminoso vs. Profundo:</strong> El grado de luz natural que predomina en tu cabello, ojos y tez.
                 </p>
               </div>
 
@@ -210,23 +210,23 @@ export const ColorSeasonModal: React.FC<ColorSeasonModalProps> = ({
                 <div className="w-7 h-7 rounded-xl bg-purple-50 text-purple-800 flex items-center justify-center font-bold text-xs">
                   <Eye className="w-4 h-4 text-purple-700" />
                 </div>
-                <h4 className="font-semibold text-neutral-900 text-xs">3. Contraste (Croma)</h4>
+                <h4 className="font-semibold text-neutral-900 text-xs">3. Contraste Facial</h4>
                 <p className="text-[11px] text-neutral-600 leading-snug">
-                  <strong>Brillante vs. Suave:</strong> La diferencia de intensidad entre el blanco de tus ojos, piel y cabello.
+                  <strong>Brillante vs. Suave:</strong> La diferencia de intensidad entre tus ojos, piel y cabello.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Las 4 Grandes Estaciones */}
+          {/* Las 4 Grandes Familias */}
           <div className="space-y-3">
             <h3 className="font-serif text-base sm:text-lg font-bold text-neutral-900">
-              Las 4 Familias de Estaciones
+              Las 4 Familias de Armonía Cromática
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {Object.entries(SEASONS_SUMMARY).map(([key, season]) => {
-                const isCurrentActive = activeMainSeason === key;
+              {Object.entries(HARMONIES_SUMMARY).map(([key, harmony]) => {
+                const isCurrentActive = activeMainFamily === key;
                 return (
                   <div 
                     key={key}
@@ -238,29 +238,29 @@ export const ColorSeasonModal: React.FC<ColorSeasonModalProps> = ({
                   >
                     <div className="flex items-center justify-between gap-2 mb-1.5">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-lg">{season.icon}</span>
+                        <span className="text-lg">{harmony.icon}</span>
                         <h4 className="font-serif font-bold text-neutral-900 text-sm">
-                          {season.name}
+                          {harmony.name}
                         </h4>
                       </div>
                       {isCurrentActive && (
                         <span className="text-[9.5px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-rose-900 text-white">
-                          Tu Estación
+                          Tu Armonía
                         </span>
                       )}
                     </div>
 
                     <span className="text-[10px] uppercase font-semibold text-neutral-400 block tracking-wider mb-1">
-                      {season.family} • {season.temp}
+                      {harmony.family} • {harmony.temp}
                     </span>
 
                     <p className="text-[11.5px] text-neutral-600 leading-relaxed mb-2.5">
-                      {season.description}
+                      {harmony.description}
                     </p>
 
                     {/* Paleta de muestra con nombres */}
                     <div className="grid grid-cols-5 gap-1 pt-1">
-                      {season.sampleColors.map((color, i) => (
+                      {harmony.sampleColors.map((color, i) => (
                         <div key={i} className="text-center group" title={`${color.name} (${color.hex})`}>
                           <div 
                             className="h-5 rounded-md border border-black/10 shadow-2xs mb-0.5 transition-transform group-hover:scale-110"

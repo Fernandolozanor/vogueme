@@ -229,7 +229,7 @@ function generateStylingTips(
     tips.push('🧥 El truco del blazer: súbete ligeramente las mangas hasta el antebrazo para que se vean tus pulseras o reloj; ese detalle hace que el outfit parezca sacado de Pinterest.');
   }
 
-  tips.push(`🎨 Paleta ${profile.colorSeason}: Estos tonos crean un contraste armónico con tu color de pelo y luminosidad de piel.`);
+  tips.push(`🎨 Armonía ${profile.colorSeason}: Estos tonos crean un contraste armónico con tu color de pelo y luminosidad de piel.`);
 
   return tips;
 }

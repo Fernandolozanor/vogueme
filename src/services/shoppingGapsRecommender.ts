@@ -7,6 +7,7 @@ import type {
   FaceShape, 
   ColorSeason 
 } from '../types';
+import { normalizeColorHarmony } from '../types';
 
 interface SeasonPaletteInfo {
   bestColorName: string;
@@ -15,67 +16,94 @@ interface SeasonPaletteInfo {
 }
 
 const SEASON_COLOR_RECOMMENDATIONS: Record<ColorSeason, SeasonPaletteInfo> = {
-  'Otoño Suave': {
+  'Cálida Suave': {
     bestColorName: 'Beige arena cálido / Terracota suave',
     bestHex: '#D8C7B5',
     paletteDescription: 'Tonos tierra cálidos y empolvados que aportan luz natural a tu tez suave.'
   },
-  'Otoño Cálido': {
+  'Cálida Terrosa': {
     bestColorName: 'Caldera / Mostaza tostado',
     bestHex: '#B3541E',
     paletteDescription: 'Matices dorados profundos que realzan el matiz dorado de tus ojos y cabello.'
   },
-  'Otoño Profundo': {
+  'Cálida Profunda': {
     bestColorName: 'Granate oscuro / Café chocolate',
     bestHex: '#4A0E17',
     paletteDescription: 'Colores intensos y saturados con base cálida para máximo impacto.'
   },
-  'Invierno Frío': {
-    bestColorName: 'Blanco puro óptico / Azul marino noche',
-    bestHex: '#FFFFFF',
-    paletteDescription: 'Contrastes gélidos y limpios que hacen resaltar tu mirada y contraste natural.'
-  },
-  'Invierno Brillante': {
-    bestColorName: 'Rojo rubí / Fucsia esmeralda',
-    bestHex: '#BE123C',
-    paletteDescription: 'Tonos joya cristalinos que multiplican el magnetismo de tus facciones.'
-  },
-  'Invierno Profundo': {
-    bestColorName: 'Cereza oscuro / Negro carbón satinado',
-    bestHex: '#450A0A',
-    paletteDescription: 'Intensidad dramática con base fría que aporta sofisticación inmediata.'
-  },
-  'Primavera Clara': {
+  'Cálida Luminosa': {
     bestColorName: 'Melocotón luminoso / Marfil cremoso',
     bestHex: '#FED7AA',
     paletteDescription: 'Tonos pastel cálidos y radiantes que iluminan tu piel fresca.'
   },
-  'Primavera Cálida': {
+  'Cálida Dorada': {
     bestColorName: 'Coral radiante / Verde lima suave',
     bestHex: '#FB923C',
     paletteDescription: 'Colores vivos y dorados que dan un aspecto saludable e hiperfavorecedor.'
   },
-  'Primavera Brillante': {
+  'Cálida Vibrante': {
     bestColorName: 'Rojo amapola / Aguamarina vibrante',
     bestHex: '#EF4444',
     paletteDescription: 'Tonos nítidos y alegres que potencian tu luz y vitalidad.'
   },
-  'Verano Claro': {
+  'Fría Clara': {
     bestColorName: 'Azul cielo pastel / Rosa empolvado',
     bestHex: '#BAE6FD',
     paletteDescription: 'Colores etéreos y sutiles con matiz frío que aportan serenidad.'
   },
-  'Verano Suave': {
+  'Fría Empolvada': {
     bestColorName: 'Verde salvia apagado / Malva grisáceo',
     bestHex: '#94A3B8',
     paletteDescription: 'Tonos empolvados y neutros fríos que armonizan con tus rasgos delicados.'
   },
-  'Verano Frío': {
+  'Fría Serena': {
     bestColorName: 'Azul lavanda gélido / Frambuesa suave',
     bestHex: '#38BDF8',
     paletteDescription: 'Gama fría y rosácea sin rastro de dorado para resaltar tu tez.'
-  }
+  },
+  'Fría Cristalina': {
+    bestColorName: 'Rojo rubí / Fucsia esmeralda',
+    bestHex: '#BE123C',
+    paletteDescription: 'Tonos joya cristalinos que multiplican el magnetismo de tus facciones.'
+  },
+  'Fría Intensa': {
+    bestColorName: 'Blanco puro óptico / Azul marino noche',
+    bestHex: '#FFFFFF',
+    paletteDescription: 'Contrastes gélidos y limpios que hacen resaltar tu mirada y contraste natural.'
+  },
+  'Fría Profunda': {
+    bestColorName: 'Cereza oscuro / Negro carbón satinado',
+    bestHex: '#450A0A',
+    paletteDescription: 'Intensidad dramática con base fría que aporta sofisticación inmediata.'
+  },
+
+  // Alias heredados:
+  'Otoño Suave': null as any,
+  'Otoño Cálido': null as any,
+  'Otoño Profundo': null as any,
+  'Primavera Clara': null as any,
+  'Primavera Cálida': null as any,
+  'Primavera Brillante': null as any,
+  'Verano Claro': null as any,
+  'Verano Suave': null as any,
+  'Verano Frío': null as any,
+  'Invierno Brillante': null as any,
+  'Invierno Frío': null as any,
+  'Invierno Profundo': null as any
 };
+
+SEASON_COLOR_RECOMMENDATIONS['Otoño Suave'] = SEASON_COLOR_RECOMMENDATIONS['Cálida Suave'];
+SEASON_COLOR_RECOMMENDATIONS['Otoño Cálido'] = SEASON_COLOR_RECOMMENDATIONS['Cálida Terrosa'];
+SEASON_COLOR_RECOMMENDATIONS['Otoño Profundo'] = SEASON_COLOR_RECOMMENDATIONS['Cálida Profunda'];
+SEASON_COLOR_RECOMMENDATIONS['Primavera Clara'] = SEASON_COLOR_RECOMMENDATIONS['Cálida Luminosa'];
+SEASON_COLOR_RECOMMENDATIONS['Primavera Cálida'] = SEASON_COLOR_RECOMMENDATIONS['Cálida Dorada'];
+SEASON_COLOR_RECOMMENDATIONS['Primavera Brillante'] = SEASON_COLOR_RECOMMENDATIONS['Cálida Vibrante'];
+SEASON_COLOR_RECOMMENDATIONS['Verano Claro'] = SEASON_COLOR_RECOMMENDATIONS['Fría Clara'];
+SEASON_COLOR_RECOMMENDATIONS['Verano Suave'] = SEASON_COLOR_RECOMMENDATIONS['Fría Empolvada'];
+SEASON_COLOR_RECOMMENDATIONS['Verano Frío'] = SEASON_COLOR_RECOMMENDATIONS['Fría Serena'];
+SEASON_COLOR_RECOMMENDATIONS['Invierno Brillante'] = SEASON_COLOR_RECOMMENDATIONS['Fría Cristalina'];
+SEASON_COLOR_RECOMMENDATIONS['Invierno Frío'] = SEASON_COLOR_RECOMMENDATIONS['Fría Intensa'];
+SEASON_COLOR_RECOMMENDATIONS['Invierno Profundo'] = SEASON_COLOR_RECOMMENDATIONS['Fría Profunda'];
 
 interface VisagismoFaceGuidance {
   necklineSuggestion: string;
@@ -220,11 +248,11 @@ export function generateSmartShoppingGaps(
   // 2. Datos biométricos y faciales del usuario
   const faceShape = (profile.faceShape || 'ovalada') as FaceShape;
   const bodyShape = (profile.bodyShape || 'reloj_de_arena') as BodyShape;
-  const colorSeason = (profile.colorSeason || 'Otoño Suave') as ColorSeason;
+  const colorSeason = normalizeColorHarmony(profile.colorSeason);
 
   const visagismo = FACE_SHAPE_VISAGISMO[faceShape] || FACE_SHAPE_VISAGISMO.ovalada;
   const morphology = BODY_SHAPE_GUIDANCE[bodyShape] || BODY_SHAPE_GUIDANCE.reloj_de_arena;
-  const colorInfo = SEASON_COLOR_RECOMMENDATIONS[colorSeason] || SEASON_COLOR_RECOMMENDATIONS['Otoño Suave'];
+  const colorInfo = SEASON_COLOR_RECOMMENDATIONS[colorSeason] || SEASON_COLOR_RECOMMENDATIONS['Cálida Suave'];
 
   const height = profile.heightCm || 167;
   const heightTag = height < 163 
@@ -259,7 +287,7 @@ export function generateSmartShoppingGaps(
     colorHex: colorInfo.bestHex,
     morphologyReason: `Para tu silueta ${bodyShape.replace('_', ' ')} (${waist}cm de cintura y ${hips}cm de cadera): ${morphology.bottomWhy} ${heightTag}.`,
     facialAnalysisReason: `Al despejar la línea inferior con un tono de tu paleta ${colorSeason}, mantiene la armonía cromática con tu tono de piel.`,
-    colorSeasonReason: `El ${colorInfo.bestColorName} pertenece a tu carta de color ${colorSeason}, aportando contraste equilibrado.`,
+    colorSeasonReason: `El ${colorInfo.bestColorName} pertenece a tu Armonía Cromática Personal ${colorSeason}, aportando contraste equilibrado.`,
     necklineOrCut: 'Tiro alto con pinza delantera y pernera recta/fluida',
     compatibleGarmentNames: [...topNames.slice(0, 1), ...shoeNames.slice(0, 1)]
   });
@@ -369,11 +397,11 @@ export function generateSmartShoppingGaps(
     unlockedOutfitsCount: Math.max(bottoms.length * tops.length, 9),
     tags: ['calzado cómodo', 'tendencia', 'atemporal'],
     searchUrl: getSearchUrl(storeShoes, 'mocasines piel herraje mary jane burdeos'),
-    colorSuggestion: colorSeason.includes('Invierno') || profile.skinUndertone === 'frio' ? 'Burdeos cereza / Negro' : 'Cacao / Cuero tostado',
-    colorHex: colorSeason.includes('Invierno') ? '#4A0E17' : '#5C3826',
+    colorSuggestion: colorSeason.includes('Fría') || colorSeason.includes('Invierno') || profile.skinUndertone === 'frio' ? 'Burdeos cereza / Negro' : 'Cacao / Cuero tostado',
+    colorHex: colorSeason.includes('Fría') || colorSeason.includes('Invierno') ? '#4A0E17' : '#5C3826',
     morphologyReason: `La puntera ligeramente afilada o almendrada prolonga la línea de la pierna (${height} cm de altura).`,
     facialAnalysisReason: 'Aporta un punto de contraste sofisticado que balancea la presencia del outfit completo.',
-    colorSeasonReason: `Tono compatible 100% con tu estación ${colorSeason}.`,
+    colorSeasonReason: `Tono compatible 100% con tu Armonía Cromática Personal ${colorSeason}.`,
     necklineOrCut: 'Suela fina con tacón de 1.5 cm y puntera almendrada',
     compatibleGarmentNames: bottomNames.slice(0, 2)
   });

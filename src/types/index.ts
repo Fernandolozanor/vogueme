@@ -33,6 +33,20 @@ export interface ClothingItem {
 }
 
 export type ColorSeason = 
+  // Armonía Cromática Personal (Nuevas denominaciones no estacionales)
+  | 'Cálida Suave' 
+  | 'Cálida Terrosa' 
+  | 'Cálida Profunda' 
+  | 'Cálida Luminosa' 
+  | 'Cálida Dorada' 
+  | 'Cálida Vibrante' 
+  | 'Fría Clara' 
+  | 'Fría Empolvada' 
+  | 'Fría Serena' 
+  | 'Fría Cristalina' 
+  | 'Fría Intensa' 
+  | 'Fría Profunda'
+  // Compatibilidad hacia atrás:
   | 'Otoño Suave' 
   | 'Otoño Cálido' 
   | 'Otoño Profundo' 
@@ -45,6 +59,39 @@ export type ColorSeason =
   | 'Verano Claro' 
   | 'Verano Suave' 
   | 'Verano Frío';
+
+export const COLOR_HARMONY_MAP: Record<string, ColorSeason> = {
+  'Cálida Suave': 'Cálida Suave',
+  'Cálida Terrosa': 'Cálida Terrosa',
+  'Cálida Profunda': 'Cálida Profunda',
+  'Cálida Luminosa': 'Cálida Luminosa',
+  'Cálida Dorada': 'Cálida Dorada',
+  'Cálida Vibrante': 'Cálida Vibrante',
+  'Fría Clara': 'Fría Clara',
+  'Fría Empolvada': 'Fría Empolvada',
+  'Fría Serena': 'Fría Serena',
+  'Fría Cristalina': 'Fría Cristalina',
+  'Fría Intensa': 'Fría Intensa',
+  'Fría Profunda': 'Fría Profunda',
+  // Mapeo desde nombres tradicionales de estaciones:
+  'Otoño Suave': 'Cálida Suave',
+  'Otoño Cálido': 'Cálida Terrosa',
+  'Otoño Profundo': 'Cálida Profunda',
+  'Primavera Clara': 'Cálida Luminosa',
+  'Primavera Cálida': 'Cálida Dorada',
+  'Primavera Brillante': 'Cálida Vibrante',
+  'Verano Claro': 'Fría Clara',
+  'Verano Suave': 'Fría Empolvada',
+  'Verano Frío': 'Fría Serena',
+  'Invierno Brillante': 'Fría Cristalina',
+  'Invierno Frío': 'Fría Intensa',
+  'Invierno Profundo': 'Fría Profunda'
+};
+
+export function normalizeColorHarmony(season?: string): ColorSeason {
+  if (!season) return 'Cálida Suave';
+  return COLOR_HARMONY_MAP[season] || 'Cálida Suave';
+}
 
 export interface ColorSwatch {
   name: string;

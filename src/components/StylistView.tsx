@@ -53,7 +53,7 @@ const PRESET_ACTIVITIES = [
 const CITIES = ['Madrid', 'Barcelona', 'Sevilla', 'Valencia', 'Bilbao', 'Málaga', 'Zaragoza', 'Granada'];
 
 const HARMONY_DETAILS: Record<string, { summary: string; whyWorks: string; starColors: ColorSwatch[]; avoid: string }> = {
-  'Otoño Suave': {
+  'Cálida Suave': {
     summary: 'Tonos tierra cálidos, aterciopelados y apagados. Predominan el camel, arena, terracota, marrón chocolate y verde oliva.',
     whyWorks: 'Suaviza las facciones y aporta un brillo dorado natural a pieles cálidas con contraste moderado.',
     starColors: [
@@ -65,8 +65,8 @@ const HARMONY_DETAILS: Record<string, { summary: string; whyWorks: string; starC
     ],
     avoid: 'Negro puro o neones estridentes cerca de la cara.'
   },
-  'Otoño Cálido': {
-    summary: 'Colores otoñales ricos, intensos y dorados como el mostaza, teja, caldera, bronce y bosque.',
+  'Cálida Terrosa': {
+    summary: 'Colores cálidos ricos, intensos y dorados como el mostaza, teja, caldera, bronce y bosque.',
     whyWorks: 'Intensifica la calidez del cabello cobrizo o castaño dorado y la profundidad de los ojos miel.',
     starColors: [
       { name: 'Mostaza dorada', hex: '#C5A059' },
@@ -77,7 +77,7 @@ const HARMONY_DETAILS: Record<string, { summary: string; whyWorks: string; starC
     ],
     avoid: 'Tonos gélidos o pasteles fríos descoloridos.'
   },
-  'Otoño Profundo': {
+  'Cálida Profunda': {
     summary: 'Tonos profundos, cálidos y penetrantes: granate, café oscuro, cacao y verde petróleo.',
     whyWorks: 'Acompaña la intensidad de rasgos oscuros con calidez sin restar fuerza visual.',
     starColors: [
@@ -89,43 +89,7 @@ const HARMONY_DETAILS: Record<string, { summary: string; whyWorks: string; starC
     ],
     avoid: 'Colores pastel excesivamente pálidos.'
   },
-  'Invierno Frío': {
-    summary: 'Contraste nítido y base fría: blanco puro, negro azabache, azul marino, rubí y magenta.',
-    whyWorks: 'Crea un impacto visual elegante que hace que la piel clara u oscura fría resalte con pureza.',
-    starColors: [
-      { name: 'Blanco puro', hex: '#FFFFFF' },
-      { name: 'Negro azabache', hex: '#0A0A0A' },
-      { name: 'Azul marino frío', hex: '#1E3A8A' },
-      { name: 'Rojo rubí', hex: '#BE123C' },
-      { name: 'Púrpura real', hex: '#701A75' }
-    ],
-    avoid: 'Tonos mostaza, naranjas terrosos o marrones cálidos.'
-  },
-  'Invierno Brillante': {
-    summary: 'Colores joya vibrantes y saturados: zafiro, fucsia eléctrico, verde esmeralda y blanco puro.',
-    whyWorks: 'Realza los ojos cristalinos y el alto contraste natural entre cabello y piel.',
-    starColors: [
-      { name: 'Azul cobalto', hex: '#2563EB' },
-      { name: 'Fucsia eléctrico', hex: '#EC4899' },
-      { name: 'Esmeralda vivo', hex: '#059669' },
-      { name: 'Blanco nuclear', hex: '#FFFFFF' },
-      { name: 'Negro noche', hex: '#0F172A' }
-    ],
-    avoid: 'Tonos tierra apagados y tonos beige topo.'
-  },
-  'Invierno Profundo': {
-    summary: 'Colores oscuros, fríos e imponentes: cereza oscuro, ciruela, berenjena y azul medianoche.',
-    whyWorks: 'Aporta magnetismo y sofisticación a rostros de cabello y ojos oscuros y piel fría.',
-    starColors: [
-      { name: 'Cereza oscuro', hex: '#450A0A' },
-      { name: 'Berenjena intenso', hex: '#3B0764' },
-      { name: 'Gris carbón', hex: '#1E293B' },
-      { name: 'Magenta oscuro', hex: '#831843' },
-      { name: 'Azul noche', hex: '#0F172A' }
-    ],
-    avoid: 'Tonos pastel descoloridos o amarillos dorados.'
-  },
-  'Primavera Clara': {
+  'Cálida Luminosa': {
     summary: 'Tonos pastel cálidos, luminosos y dulces: melocotón, aguamarina, coral suave y marfil.',
     whyWorks: 'Aporta frescura juvenil y luz diáfana a pieles con subtono dorado muy claro.',
     starColors: [
@@ -137,7 +101,7 @@ const HARMONY_DETAILS: Record<string, { summary: string; whyWorks: string; starC
     ],
     avoid: 'Negro pesado o gris oscuro industrial.'
   },
-  'Primavera Cálida': {
+  'Cálida Dorada': {
     summary: 'Colores alegres, dorados y luminosos: coral vivo, turquesa cálido, verde lima y amarillo mantequilla.',
     whyWorks: 'Irradia vitalidad y resalta los reflejos dorados del rostro.',
     starColors: [
@@ -149,7 +113,7 @@ const HARMONY_DETAILS: Record<string, { summary: string; whyWorks: string; starC
     ],
     avoid: 'Gris apagado o azul pizarra triste.'
   },
-  'Primavera Brillante': {
+  'Cálida Vibrante': {
     summary: 'Colores cristalinos, vibrantes y cálidos: rojo amapola, fucsia cálido y verde manzana.',
     whyWorks: 'Armoniza con miradas vivas y pieles radiantes de alto contraste.',
     starColors: [
@@ -161,7 +125,7 @@ const HARMONY_DETAILS: Record<string, { summary: string; whyWorks: string; starC
     ],
     avoid: 'Colores terrosos sucios o apagados.'
   },
-  'Verano Claro': {
+  'Fría Clara': {
     summary: 'Tonos empolvados, fríos y delicados: rosa bebé, azul cielo, lavanda y gris perla.',
     whyWorks: 'Aporta una elegancia sutil y aterciopelada a rasgos rubios o castaños claros fríos.',
     starColors: [
@@ -173,7 +137,7 @@ const HARMONY_DETAILS: Record<string, { summary: string; whyWorks: string; starC
     ],
     avoid: 'Naranjas chillones o tonos teja.'
   },
-  'Verano Suave': {
+  'Fría Empolvada': {
     summary: 'Tonos neutros fríos y mates: malva, verde salvia, azul acero y rosa ceniza.',
     whyWorks: 'Equilibra rostros de armonía suave sin sobrecargar la expresión.',
     starColors: [
@@ -185,7 +149,7 @@ const HARMONY_DETAILS: Record<string, { summary: string; whyWorks: string; starC
     ],
     avoid: 'Colores saturados puros o tonos dorados brillantes.'
   },
-  'Verano Frío': {
+  'Fría Serena': {
     summary: 'Azules gélidos, frambuesa, gris azulado y rosa frío.',
     whyWorks: 'Resalta el subtono rosado o azulado de la piel con elegancia nórdica.',
     starColors: [
@@ -196,8 +160,71 @@ const HARMONY_DETAILS: Record<string, { summary: string; whyWorks: string; starC
       { name: 'Azul marino suave', hex: '#1E40AF' }
     ],
     avoid: 'Mostaza, teja o camel cálido.'
-  }
+  },
+  'Fría Cristalina': {
+    summary: 'Colores joya vibrantes y saturados: zafiro, fucsia eléctrico, verde esmeralda y blanco puro.',
+    whyWorks: 'Realza los ojos cristalinos y el alto contraste natural entre cabello y piel.',
+    starColors: [
+      { name: 'Azul cobalto', hex: '#2563EB' },
+      { name: 'Fucsia eléctrico', hex: '#EC4899' },
+      { name: 'Esmeralda vivo', hex: '#059669' },
+      { name: 'Blanco nuclear', hex: '#FFFFFF' },
+      { name: 'Negro noche', hex: '#0F172A' }
+    ],
+    avoid: 'Tonos tierra apagados y tonos beige topo.'
+  },
+  'Fría Intensa': {
+    summary: 'Contraste nítido y base fría: blanco puro, negro azabache, azul marino, rubí y magenta.',
+    whyWorks: 'Crea un impacto visual elegante que hace que la piel clara u oscura fría resalte con pureza.',
+    starColors: [
+      { name: 'Blanco puro', hex: '#FFFFFF' },
+      { name: 'Negro azabache', hex: '#0A0A0A' },
+      { name: 'Azul marino frío', hex: '#1E3A8A' },
+      { name: 'Rojo rubí', hex: '#BE123C' },
+      { name: 'Púrpura real', hex: '#701A75' }
+    ],
+    avoid: 'Tonos mostaza, naranjas terrosos o marrones cálidos.'
+  },
+  'Fría Profunda': {
+    summary: 'Colores oscuros, fríos e imponentes: cereza oscuro, ciruela, berenjena y azul medianoche.',
+    whyWorks: 'Aporta magnetismo y sofisticación a rostros de cabello y ojos oscuros y piel fría.',
+    starColors: [
+      { name: 'Cereza oscuro', hex: '#450A0A' },
+      { name: 'Berenjena intenso', hex: '#3B0764' },
+      { name: 'Gris carbón', hex: '#1E293B' },
+      { name: 'Magenta oscuro', hex: '#831843' },
+      { name: 'Azul noche', hex: '#0F172A' }
+    ],
+    avoid: 'Tonos pastel descoloridos o amarillos dorados.'
+  },
+
+  // Alias heredados:
+  'Otoño Suave': null as any,
+  'Otoño Cálido': null as any,
+  'Otoño Profundo': null as any,
+  'Primavera Clara': null as any,
+  'Primavera Cálida': null as any,
+  'Primavera Brillante': null as any,
+  'Verano Claro': null as any,
+  'Verano Suave': null as any,
+  'Verano Frío': null as any,
+  'Invierno Brillante': null as any,
+  'Invierno Frío': null as any,
+  'Invierno Profundo': null as any
 };
+
+HARMONY_DETAILS['Otoño Suave'] = HARMONY_DETAILS['Cálida Suave'];
+HARMONY_DETAILS['Otoño Cálido'] = HARMONY_DETAILS['Cálida Terrosa'];
+HARMONY_DETAILS['Otoño Profundo'] = HARMONY_DETAILS['Cálida Profunda'];
+HARMONY_DETAILS['Primavera Clara'] = HARMONY_DETAILS['Cálida Luminosa'];
+HARMONY_DETAILS['Primavera Cálida'] = HARMONY_DETAILS['Cálida Dorada'];
+HARMONY_DETAILS['Primavera Brillante'] = HARMONY_DETAILS['Cálida Vibrante'];
+HARMONY_DETAILS['Verano Claro'] = HARMONY_DETAILS['Fría Clara'];
+HARMONY_DETAILS['Verano Suave'] = HARMONY_DETAILS['Fría Empolvada'];
+HARMONY_DETAILS['Verano Frío'] = HARMONY_DETAILS['Fría Serena'];
+HARMONY_DETAILS['Invierno Brillante'] = HARMONY_DETAILS['Fría Cristalina'];
+HARMONY_DETAILS['Invierno Frío'] = HARMONY_DETAILS['Fría Intensa'];
+HARMONY_DETAILS['Invierno Profundo'] = HARMONY_DETAILS['Fría Profunda'];
 
 function useWindowSize() {
   const [size, setSize] = useState({
@@ -383,7 +410,7 @@ export const StylistView: React.FC<StylistViewProps> = ({
     });
   };
 
-  const harmonyData = HARMONY_DETAILS[profile.colorSeason] || HARMONY_DETAILS['Otoño Suave'];
+  const harmonyData = HARMONY_DETAILS[profile.colorSeason] || HARMONY_DETAILS['Cálida Suave'];
 
   if (!recommendation || wardrobe.length === 0) {
     return (
@@ -770,7 +797,7 @@ export const StylistView: React.FC<StylistViewProps> = ({
                   Accesorios recomendados:
                 </span>
                 <p className="text-[11px] text-neutral-600">
-                  Apuesta por pendientes y detalles en tonos dorados cálidos que armonicen con tu estación {profile.colorSeason}.
+                  Apuesta por pendientes y detalles en tonos dorados cálidos que armonicen con tu Armonía Cromática Personal {profile.colorSeason}.
                 </p>
               </div>
 
@@ -1294,7 +1321,7 @@ export const StylistView: React.FC<StylistViewProps> = ({
                   💡 ¿Cómo cambiar tu armonía en la app?
                 </span>
                 <p className="text-[11px] text-neutral-700 leading-relaxed">
-                  Puedes seleccionar otra estación cromática manualmente o volver a hacerte el escáner de selfie con luz natural desde tu perfil.
+                  Puedes seleccionar otra armonía cromática manualmente o volver a hacerte el escáner de selfie con luz natural desde tu perfil.
                 </p>
 
                 <button
@@ -1303,7 +1330,7 @@ export const StylistView: React.FC<StylistViewProps> = ({
                   className="w-full py-2 px-3 rounded-xl bg-white hover:bg-[#FAF8F5] text-neutral-900 font-semibold text-xs flex items-center justify-center gap-1.5 border border-neutral-300 transition-colors cursor-pointer shadow-2xs mt-1"
                 >
                   <HelpCircle className="w-3.5 h-3.5 text-rose-900" />
-                  <span>¿Cómo funciona la Colorimetría? (Guía completa)</span>
+                  <span>¿Cómo funciona la Armonía Cromática? (Guía completa)</span>
                 </button>
                 
                 {onNavigateToProfile && (

@@ -1,4 +1,5 @@
 import type { ClothingItem, UserProfile } from '../types';
+import { normalizeColorHarmony } from '../types';
 import { INITIAL_CLOTHES, INITIAL_USER_PROFILE } from '../data/initialData';
 
 const CLOTHES_STORAGE_KEY = 'vogueme_clothes_v1';
@@ -113,7 +114,11 @@ export const getStoredProfile = (): UserProfile => {
       localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(INITIAL_USER_PROFILE));
       return INITIAL_USER_PROFILE;
     }
-    return JSON.parse(raw);
+    const profile: UserProfile = JSON.parse(raw);
+    if (profile.colorSeason) {
+      profile.colorSeason = normalizeColorHarmony(profile.colorSeason);
+    }
+    return profile;
   } catch (err) {
     console.error('Error loading profile', err);
     return INITIAL_USER_PROFILE;

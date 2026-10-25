@@ -678,7 +678,7 @@ export const extractLocalBiometricFeatures = async (
         if (contrastDelta > 95) facialContrast = 'alto';
         else if (contrastDelta < 50) facialContrast = 'suave';
 
-        // 6. ESTACIÓN CROMÁTICA
+        // 6. ARMONÍA CROMÁTICA PERSONAL
         const colorSeason: ColorSeason = calculateColorSeason({
           skinUndertone: undertone,
           skinTone,
@@ -692,7 +692,7 @@ export const extractLocalBiometricFeatures = async (
         const necklineTip = getNecklineTip(faceShape);
         const eyewearTip = getEyewearTip(faceShape);
 
-        const summaryText = `Análisis Facial completado: Rostro ${faceShape.toUpperCase()} con contraste ${facialContrast}. Piel de subtono ${undertone} (${skinTone}), ojos ${detectedEyes} y cabello ${detectedHair}. Tu paleta armonizadora ideal es ${colorSeason}.`;
+        const summaryText = `Análisis Facial completado: Rostro ${faceShape.toUpperCase()} con contraste ${facialContrast}. Piel de subtono ${undertone} (${skinTone}), ojos ${detectedEyes} y cabello ${detectedHair}. Tu Armonía Cromática Personal ideal es ${colorSeason}.`;
 
         resolve({
           skinTone,
@@ -783,7 +783,7 @@ export interface ColorSeasonCalculationParams {
 }
 
 /**
- * Calcula con precisión la estación cromática óptima según el sistema de 12 estaciones
+ * Calcula con precisión la Armonía Cromática Personal óptima según el sistema de 12 armonías
  * a partir de las 4 variables fisonómicas esenciales: subtono, tono, contraste facial y matiz de ojos/pelo.
  */
 export function calculateColorSeason(params: ColorSeasonCalculationParams): ColorSeason {
@@ -804,90 +804,90 @@ export function calculateColorSeason(params: ColorSeasonCalculationParams): Colo
 
   // 1. SUBTONO CÁLIDO
   if (skinUndertone === 'calido') {
-    // Alto contraste y brillo luminoso -> Primavera Brillante
+    // Alto contraste y brillo luminoso -> Cálida Vibrante
     if (facialContrast === 'alto') {
-      return 'Primavera Brillante';
+      return 'Cálida Vibrante';
     }
 
-    // Piel clara + ojos claros o pelo rubio -> Primavera Clara
+    // Piel clara + ojos claros o pelo rubio -> Cálida Luminosa
     if (isLightSkin && (hasLightHair || hasLightEyes)) {
-      return 'Primavera Clara';
+      return 'Cálida Luminosa';
     }
 
-    // Cabello cobrizo / pelirrojo o reflejos dorados con ojos ámbar -> Otoño Cálido
+    // Cabello cobrizo / pelirrojo o reflejos dorados con ojos ámbar -> Cálida Terrosa
     if (hasRedHair || (hasWarmEyes && hasWarmHair)) {
-      return 'Otoño Cálido';
+      return 'Cálida Terrosa';
     }
 
-    // Piel profunda o cabello castaño muy oscuro / café con piel cálida -> Otoño Profundo
+    // Piel profunda o cabello castaño muy oscuro / café con piel cálida -> Cálida Profunda
     if (isDeepSkin || (hasDarkHair && !isLightSkin)) {
-      return 'Otoño Profundo';
+      return 'Cálida Profunda';
     }
 
-    // Contraste suave / tonos tierra aterciopelados -> Otoño Suave
+    // Contraste suave / tonos tierra aterciopelados -> Cálida Suave
     if (facialContrast === 'suave') {
-      return 'Otoño Suave';
+      return 'Cálida Suave';
     }
 
-    // Piel clara/media con tonos dorados vivos -> Primavera Cálida
+    // Piel clara/media con tonos dorados vivos -> Cálida Dorada
     if (hasWarmHair || hasWarmEyes || isLightSkin) {
-      return 'Primavera Cálida';
+      return 'Cálida Dorada';
     }
 
-    return 'Otoño Suave';
+    return 'Cálida Suave';
   }
 
   // 2. SUBTONO FRÍO
   if (skinUndertone === 'frio') {
-    // Alto contraste o pelo negro azabache -> Familia Invierno
+    // Alto contraste o pelo negro azabache -> Familia Fría Intensa / Cristalina / Profunda
     if (facialContrast === 'alto' || hairColor.includes('azabache') || (hasDarkHair && isLightSkin)) {
       if (hasLightEyes) {
-        return 'Invierno Frío';
+        return 'Fría Intensa';
       }
       if (isDeepSkin || hasDeepEyes) {
-        return 'Invierno Profundo';
+        return 'Fría Profunda';
       }
-      return 'Invierno Brillante';
+      return 'Fría Cristalina';
     }
 
-    // Piel clara con cabello rubio ceniza o claro -> Verano Claro
+    // Piel clara con cabello rubio ceniza o claro -> Fría Clara
     if (isLightSkin && (hasLightHair || hasLightEyes)) {
-      return 'Verano Claro';
+      return 'Fría Clara';
     }
 
-    // Piel profunda o pelo muy oscuro frío -> Invierno Profundo
+    // Piel profunda o pelo muy oscuro frío -> Fría Profunda
     if (isDeepSkin || hasDarkHair) {
-      return 'Invierno Profundo';
+      return 'Fría Profunda';
     }
 
-    // Rasgos fríos predominantes (ojos azules/grises o pelo ceniza) -> Verano Frío
+    // Rasgos fríos predominantes (ojos azules/grises o pelo ceniza) -> Fría Serena
     if (hasLightEyes || hasCoolHair) {
-      return 'Verano Frío';
+      return 'Fría Serena';
     }
 
-    // Contraste suave / empolvado -> Verano Suave
-    return 'Verano Suave';
+    // Contraste suave / empolvado -> Fría Empolvada
+    return 'Fría Empolvada';
   }
 
   // 3. SUBTONO NEUTRO
   // En neutro, el contraste facial y la luminosidad de piel/ojos guían la elección
   if (facialContrast === 'alto') {
-    return hasLightEyes ? 'Invierno Brillante' : 'Primavera Brillante';
+    return hasLightEyes ? 'Fría Cristalina' : 'Cálida Vibrante';
   }
 
   if (isDeepSkin || (hasDarkHair && hasDeepEyes)) {
-    return 'Otoño Profundo';
+    return 'Cálida Profunda';
   }
 
   if (isLightSkin && (hasLightHair || hasLightEyes)) {
-    return 'Verano Claro';
+    return 'Fría Clara';
   }
 
   if (facialContrast === 'suave') {
-    return (hasWarmEyes || hasWarmHair) ? 'Otoño Suave' : 'Verano Suave';
+    return (hasWarmEyes || hasWarmHair) ? 'Cálida Suave' : 'Fría Empolvada';
   }
 
-  return 'Otoño Suave';
+  return 'Cálida Suave';
 }
 
 export const getEyewearTip = (shape: FaceShape): string => {
@@ -915,8 +915,8 @@ const getDefaultAnalysis = (): FacialAnalysisResult => ({
   hairColor: 'Castaño iluminado / Avellana',
   faceShape: 'ovalada',
   facialContrast: 'medio',
-  colorSeason: 'Otoño Suave',
-  summaryText: 'Perfil armonizado en paleta cálida y suave. Rostro ovalado equilibrado con ojos color miel y cabello castaño avellana.',
+  colorSeason: 'Cálida Suave',
+  summaryText: 'Perfil calibrado en Armonía Cromática Personal Cálida Suave. Rostro ovalado equilibrado con ojos color miel y cabello castaño avellana.',
   jewelryTip: 'Apuesta por pendientes y detalles en oro amarillo cálido o tonos bronce.',
   necklineTip: 'Los escotes en V y cuellos fluidos favorecen la proporción natural de tu cuello.',
   eyewearTip: 'Gafas de sol cat-eye o rectangulares de pasta carey o marrón cálido.'

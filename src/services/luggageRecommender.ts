@@ -340,13 +340,13 @@ function scoreItemForTrip(
     score += 10;
   }
 
-  // Armonía con la estación cromática del usuario
+  // Armonía Cromática Personal del usuario
   if (profile.colorSeason) {
     const isWarmSeason = profile.colorSeason.includes('Cálid') || profile.colorSeason.includes('Otoño') || profile.colorSeason.includes('Primavera');
     const isWarmColor = colorLower.includes('marron') || colorLower.includes('beige') || colorLower.includes('dorado') || colorLower.includes('naranja') || colorLower.includes('camel') || colorLower.includes('oliva');
     if (isWarmSeason && isWarmColor) {
       score += 12;
-      reasons.push(`Favorece tu paleta ${profile.colorSeason}`);
+      reasons.push(`Favorece tu Armonía Cromática Personal ${profile.colorSeason}`);
     }
   }
 
