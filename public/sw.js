@@ -1,5 +1,5 @@
 // VogueMe Service Worker - PWA Offline Caching & Instant Launch
-const CACHE_NAME = 'vogueme-pwa-v9';
+const CACHE_NAME = 'vogueme-pwa-v10';
 const STATIC_ASSETS = [
   './',
   './index.html',

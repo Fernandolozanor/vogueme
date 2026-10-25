@@ -17,7 +17,6 @@ import {
   Trash2,
   RotateCcw,
   CheckCircle2,
-  HelpCircle,
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
@@ -896,19 +895,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                           </div>
                         </div>
 
-                        {/* 4. Paleta Estacional */}
+                        {/* 4. Armonía Cromática Personal */}
                         <div className="flex items-center justify-between text-[11px]">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-neutral-500">Paleta Estación:</span>
-                            <button
-                              type="button"
-                              onClick={() => setIsColorSeasonModalOpen(true)}
-                              className="text-rose-900 hover:text-rose-950 hover:underline inline-flex items-center gap-0.5 font-medium cursor-pointer"
-                              title="Ver cómo funciona la colorimetría"
-                            >
-                              <HelpCircle className="w-3 h-3 text-rose-800" />
-                              <span className="text-[10px]">¿Cómo funciona?</span>
-                            </button>
+                            <span className="text-neutral-500">Armonía Personal:</span>
                           </div>
                           <div className="flex items-center gap-1.5 font-medium">
                             <span className="text-neutral-400">Foto: {currentProfile.detectedFacialFeatures.colorSeason}</span>
@@ -1406,46 +1396,19 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                   </p>
                 </div>
 
-                {/* Mobile action buttons & chevron */}
-                <div className="lg:hidden flex items-center gap-1.5 shrink-0 ml-2">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsColorSeasonModalOpen(true);
-                    }}
-                    className="px-2 py-0.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-950 border border-rose-200/90 text-[10px] font-semibold flex items-center gap-1 cursor-pointer shrink-0"
-                    title="Ver explicación completa de cómo funciona la armonía cromática"
-                  >
-                    <HelpCircle className="w-3 h-3 text-rose-900" />
-                    <span>Ayuda</span>
-                  </button>
-
-                  <div className="flex items-center gap-0.5 text-[11px] sm:text-xs font-semibold text-rose-900 shrink-0">
-                    <span>{expandedMobileSection === 'colorSeason' ? 'Plegar' : 'Ajustar'}</span>
-                    {expandedMobileSection === 'colorSeason' ? (
-                      <ChevronUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-900" />
-                    ) : (
-                      <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-400" />
-                    )}
-                  </div>
+                {/* Mobile chevron */}
+                <div className="lg:hidden flex items-center gap-0.5 text-[11px] sm:text-xs font-semibold text-rose-900 shrink-0 ml-2">
+                  <span>{expandedMobileSection === 'colorSeason' ? 'Plegar' : 'Ajustar'}</span>
+                  {expandedMobileSection === 'colorSeason' ? (
+                    <ChevronUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-900" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-400" />
+                  )}
                 </div>
               </div>
 
-              {/* Desktop action buttons */}
+              {/* Desktop badge */}
               <div className="hidden lg:flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsColorSeasonModalOpen(true);
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-950 border border-rose-200/90 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs"
-                  title="Ver explicación completa de cómo funciona la armonía cromática"
-                >
-                  <HelpCircle className="w-3.5 h-3.5 text-rose-900" />
-                  <span>¿Cómo funciona?</span>
-                </button>
                 <span className="text-xs font-semibold px-2.5 py-1 bg-white rounded-full border border-neutral-200 text-neutral-800 shrink-0">
                   {currentProfile.colorSeason}
                 </span>
