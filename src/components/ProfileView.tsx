@@ -27,7 +27,8 @@ import {
   extractLocalBiometricFeatures,
   getJewelryTip,
   getNecklineTip,
-  getEyewearTip
+  getEyewearTip,
+  calculateColorSeason
 } from '../services/imageProcessing';
 import { saveProfile } from '../services/storage';
 
@@ -473,7 +474,27 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
   };
 
   const updateFacialFeature = (patch: Partial<UserProfile>) => {
-    const updated = { ...currentProfile, ...patch };
+    const affectsSeason = 'skinUndertone' in patch || 
+                          'skinTone' in patch || 
+                          'facialContrast' in patch || 
+                          'eyeColor' in patch || 
+                          'hairColor' in patch;
+
+    const updated: UserProfile = { ...currentProfile, ...patch };
+
+    // Si se modifica una variable fisonómica y no se está forzando manualmente colorSeason,
+    // recalculamos en tiempo real la estación cromática idónea:
+    if (affectsSeason && !('colorSeason' in patch)) {
+      const newSeason = calculateColorSeason({
+        skinUndertone: updated.skinUndertone,
+        skinTone: updated.skinTone,
+        facialContrast: updated.facialContrast || 'medio',
+        eyeColor: updated.eyeColor,
+        hairColor: updated.hairColor
+      });
+      updated.colorSeason = newSeason;
+    }
+
     setCurrentProfile(updated);
     saveProfile(updated);
     onProfileUpdate(updated);
@@ -1080,6 +1101,20 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                   <option value="suave">Contraste Suave</option>
                 </select>
               </div>
+            </div>
+
+            {/* Estación Cromática recalculada en vivo según las 4 variables */}
+            <div className="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-3 flex items-center justify-between gap-2.5 transition-all">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Palette className="w-4 h-4 text-rose-900 shrink-0" />
+                <div className="min-w-0">
+                  <span className="text-[10.5px] text-neutral-500 block leading-tight">Estación cromática calibrada:</span>
+                  <strong className="text-xs sm:text-sm text-rose-950 font-bold block truncate">{currentProfile.colorSeason}</strong>
+                </div>
+              </div>
+              <span className="text-[10px] font-semibold text-rose-900 bg-white/90 px-2.5 py-1 rounded-full border border-rose-200 shadow-2xs shrink-0">
+                Auto-calibrada ✨
+              </span>
             </div>
 
             {/* 5. TARJETA DE VISAGISMO: CONSEJOS SEGÚN TU ROSTRO */}

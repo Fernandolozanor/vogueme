@@ -679,26 +679,13 @@ export const extractLocalBiometricFeatures = async (
         else if (contrastDelta < 50) facialContrast = 'suave';
 
         // 6. ESTACIÓN CROMÁTICA
-        let colorSeason: ColorSeason = 'Otoño Suave';
-        if (undertone === 'calido') {
-          if (facialContrast === 'alto') {
-            colorSeason = 'Primavera Brillante';
-          } else if (skinTone === 'muy_claro' || skinTone === 'claro') {
-            colorSeason = detectedEyes.includes('Azul') || detectedEyes.includes('Verde') ? 'Primavera Clara' : 'Otoño Suave';
-          } else {
-            colorSeason = detectedHair.includes('Pelirrojo') || detectedEyes.includes('Ámbar') ? 'Otoño Cálido' : 'Otoño Profundo';
-          }
-        } else if (undertone === 'frio') {
-          if (facialContrast === 'alto' || detectedHair.includes('Negro')) {
-            colorSeason = detectedEyes.includes('Azul') ? 'Invierno Frío' : 'Invierno Profundo';
-          } else if (skinTone === 'muy_claro' || detectedHair.includes('Rubio')) {
-            colorSeason = 'Verano Claro';
-          } else {
-            colorSeason = 'Verano Suave';
-          }
-        } else {
-          colorSeason = facialContrast === 'alto' ? 'Invierno Brillante' : 'Otoño Suave';
-        }
+        const colorSeason: ColorSeason = calculateColorSeason({
+          skinUndertone: undertone,
+          skinTone,
+          facialContrast,
+          eyeColor: detectedEyes,
+          hairColor: detectedHair
+        });
 
         // 7. CONSEJOS DE VISAGISMO PERSONALIZADOS
         const jewelryTip = getJewelryTip(faceShape, undertone);
@@ -786,6 +773,122 @@ export const getNecklineTip = (shape: FaceShape): string => {
       return 'Cualquier escote: desde palabra de honor y halter hasta asimétricos o cuellos camisa.';
   }
 };
+
+export interface ColorSeasonCalculationParams {
+  skinUndertone: 'calido' | 'frio' | 'neutro';
+  skinTone: 'muy_claro' | 'claro' | 'medio' | 'bronceado' | 'oscuro';
+  facialContrast: FacialContrast;
+  eyeColor?: string;
+  hairColor?: string;
+}
+
+/**
+ * Calcula con precisión la estación cromática óptima según el sistema de 12 estaciones
+ * a partir de las 4 variables fisonómicas esenciales: subtono, tono, contraste facial y matiz de ojos/pelo.
+ */
+export function calculateColorSeason(params: ColorSeasonCalculationParams): ColorSeason {
+  const { skinUndertone, skinTone, facialContrast, eyeColor = '', hairColor = '' } = params;
+
+  const isLightSkin = skinTone === 'muy_claro' || skinTone === 'claro';
+  const isDeepSkin = skinTone === 'bronceado' || skinTone === 'oscuro';
+
+  const hasLightEyes = eyeColor.includes('Azul') || eyeColor.includes('Verde') || eyeColor.includes('Gris');
+  const hasWarmEyes = eyeColor.includes('Miel') || eyeColor.includes('Ámbar') || eyeColor.includes('dorado');
+  const hasDeepEyes = eyeColor.includes('profundo') || eyeColor.includes('café') || eyeColor.includes('Negro');
+
+  const hasDarkHair = hairColor.includes('Negro') || hairColor.includes('oscuro') || hairColor.includes('chocolate');
+  const hasLightHair = hairColor.includes('Rubio') || hairColor.includes('Platino');
+  const hasRedHair = hairColor.includes('Pelirrojo') || hairColor.includes('Cobrizo');
+  const hasWarmHair = hasRedHair || hairColor.includes('dorado') || hairColor.includes('Miel') || hairColor.includes('avellana');
+  const hasCoolHair = hairColor.includes('ceniza') || hairColor.includes('Platino') || hairColor.includes('azabache');
+
+  // 1. SUBTONO CÁLIDO
+  if (skinUndertone === 'calido') {
+    // Alto contraste y brillo luminoso -> Primavera Brillante
+    if (facialContrast === 'alto') {
+      return 'Primavera Brillante';
+    }
+
+    // Piel clara + ojos claros o pelo rubio -> Primavera Clara
+    if (isLightSkin && (hasLightHair || hasLightEyes)) {
+      return 'Primavera Clara';
+    }
+
+    // Cabello cobrizo / pelirrojo o reflejos dorados con ojos ámbar -> Otoño Cálido
+    if (hasRedHair || (hasWarmEyes && hasWarmHair)) {
+      return 'Otoño Cálido';
+    }
+
+    // Piel profunda o cabello castaño muy oscuro / café con piel cálida -> Otoño Profundo
+    if (isDeepSkin || (hasDarkHair && !isLightSkin)) {
+      return 'Otoño Profundo';
+    }
+
+    // Contraste suave / tonos tierra aterciopelados -> Otoño Suave
+    if (facialContrast === 'suave') {
+      return 'Otoño Suave';
+    }
+
+    // Piel clara/media con tonos dorados vivos -> Primavera Cálida
+    if (hasWarmHair || hasWarmEyes || isLightSkin) {
+      return 'Primavera Cálida';
+    }
+
+    return 'Otoño Suave';
+  }
+
+  // 2. SUBTONO FRÍO
+  if (skinUndertone === 'frio') {
+    // Alto contraste o pelo negro azabache -> Familia Invierno
+    if (facialContrast === 'alto' || hairColor.includes('azabache') || (hasDarkHair && isLightSkin)) {
+      if (hasLightEyes) {
+        return 'Invierno Frío';
+      }
+      if (isDeepSkin || hasDeepEyes) {
+        return 'Invierno Profundo';
+      }
+      return 'Invierno Brillante';
+    }
+
+    // Piel clara con cabello rubio ceniza o claro -> Verano Claro
+    if (isLightSkin && (hasLightHair || hasLightEyes)) {
+      return 'Verano Claro';
+    }
+
+    // Piel profunda o pelo muy oscuro frío -> Invierno Profundo
+    if (isDeepSkin || hasDarkHair) {
+      return 'Invierno Profundo';
+    }
+
+    // Rasgos fríos predominantes (ojos azules/grises o pelo ceniza) -> Verano Frío
+    if (hasLightEyes || hasCoolHair) {
+      return 'Verano Frío';
+    }
+
+    // Contraste suave / empolvado -> Verano Suave
+    return 'Verano Suave';
+  }
+
+  // 3. SUBTONO NEUTRO
+  // En neutro, el contraste facial y la luminosidad de piel/ojos guían la elección
+  if (facialContrast === 'alto') {
+    return hasLightEyes ? 'Invierno Brillante' : 'Primavera Brillante';
+  }
+
+  if (isDeepSkin || (hasDarkHair && hasDeepEyes)) {
+    return 'Otoño Profundo';
+  }
+
+  if (isLightSkin && (hasLightHair || hasLightEyes)) {
+    return 'Verano Claro';
+  }
+
+  if (facialContrast === 'suave') {
+    return (hasWarmEyes || hasWarmHair) ? 'Otoño Suave' : 'Verano Suave';
+  }
+
+  return 'Otoño Suave';
+}
 
 export const getEyewearTip = (shape: FaceShape): string => {
   switch (shape) {
