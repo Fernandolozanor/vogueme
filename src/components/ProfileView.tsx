@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import type { UserProfile, ColorSeason, BodyShape, StyleTag, FaceShape, ColorSwatch } from '../types';
 import { ColorSeasonModal } from './ColorSeasonModal';
+import { FaceCaptureModal } from './FaceCaptureModal';
 import { 
   extractLocalBiometricFeatures,
   getJewelryTip,
@@ -430,6 +431,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
   const [scanResultNotice, setScanResultNotice] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isColorSeasonModalOpen, setIsColorSeasonModalOpen] = useState(false);
+  const [isFaceCaptureOpen, setIsFaceCaptureOpen] = useState(false);
 
   // Control de tarjetas plegadas en móvil (solo una abierta a la vez o todas plegadas)
   const [expandedMobileSection, setExpandedMobileSection] = useState<ProfileCardSection | null>(null);
@@ -440,10 +442,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handlePhotoScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const processScannedFile = async (file: File) => {
     setIsScanning(true);
     try {
       const analysis = await extractLocalBiometricFeatures(file);
@@ -483,8 +482,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
       console.error(err);
     } finally {
       setIsScanning(false);
-      if (e.target) e.target.value = '';
     }
+  };
+
+  const handlePhotoScan = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processScannedFile(file);
+    }
+    if (e.target) e.target.value = '';
   };
 
   const handleRemoveFacePhoto = () => {
@@ -782,7 +788,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                   <div className="flex items-center gap-1.5 self-end sm:self-auto">
                     <button
                       type="button"
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => setIsFaceCaptureOpen(true)}
                       disabled={isScanning}
                       className="px-2.5 py-1 text-xs font-medium rounded-lg bg-white border border-neutral-300 text-neutral-700 hover:text-neutral-900 hover:border-neutral-400 transition-all cursor-pointer flex items-center gap-1"
                     >
@@ -958,7 +964,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                 </p>
 
                 <button
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => setIsFaceCaptureOpen(true)}
                   disabled={isScanning}
                   className="w-full py-3 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs"
                 >
@@ -970,7 +976,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
                   ) : (
                     <>
                       <Camera className="w-4 h-4" />
-                      <span>📸 Escanear Rostro y Guardar Foto en Local</span>
+                      <span>📸 Abrir Visor Facial con Óvalo Guía</span>
                     </>
                   )}
                 </button>
@@ -1543,6 +1549,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
         isOpen={isColorSeasonModalOpen}
         onClose={() => setIsColorSeasonModalOpen(false)}
         currentSeason={currentProfile.colorSeason}
+      />
+
+      {/* Visor de Cámara con Guía de Óvalo Facial */}
+      <FaceCaptureModal
+        isOpen={isFaceCaptureOpen}
+        onClose={() => setIsFaceCaptureOpen(false)}
+        onCapture={processScannedFile}
       />
     </div>
   );
