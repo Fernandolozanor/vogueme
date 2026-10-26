@@ -1,4 +1,5 @@
 import { removeBackground } from '@imgly/background-removal';
+import { FilesetResolver, FaceLandmarker } from '@mediapipe/tasks-vision';
 import type { FacialAnalysisResult, FaceShape, FacialContrast, ColorSeason } from '../types';
 
 /**
@@ -592,226 +593,360 @@ async function generateWhiteStudioFromCutout(cutoutUrl: string, width: number, h
   });
 }
 
+let faceLandmarkerInstance: FaceLandmarker | null = null;
+let isInitializingLandmarker = false;
+
+async function getFaceLandmarker(): Promise<FaceLandmarker | null> {
+  if (faceLandmarkerInstance) return faceLandmarkerInstance;
+  if (isInitializingLandmarker) {
+    let attempts = 0;
+    while (isInitializingLandmarker && attempts < 50) {
+      await new Promise((r) => setTimeout(r, 100));
+      attempts++;
+      if (faceLandmarkerInstance) return faceLandmarkerInstance;
+    }
+  }
+
+  isInitializingLandmarker = true;
+  try {
+    const vision = await FilesetResolver.forVisionTasks(
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/wasm'
+    );
+    try {
+      faceLandmarkerInstance = await FaceLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+          delegate: 'GPU'
+        },
+        outputFaceBlendshapes: false,
+        runningMode: 'IMAGE',
+        numFaces: 1
+      });
+    } catch {
+      faceLandmarkerInstance = await FaceLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+          delegate: 'CPU'
+        },
+        outputFaceBlendshapes: false,
+        runningMode: 'IMAGE',
+        numFaces: 1
+      });
+    }
+    return faceLandmarkerInstance;
+  } catch (err) {
+    console.warn('MediaPipe FaceLandmarker no disponible, usando fallback heurístico:', err);
+    return null;
+  } finally {
+    isInitializingLandmarker = false;
+  }
+}
+
+function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+        break;
+      case g:
+        h = ((b - r) / d + 2) * 60;
+        break;
+      case b:
+        h = ((r - g) / d + 4) * 60;
+        break;
+    }
+  }
+  return { h, s, l };
+}
+
 /**
- * Local extraction of face/skin tone, eye color, hair tone and face shape for Zero-Biometric styling.
- * Converts user photo into an anonymous string profile in local memory without sending images anywhere.
+ * Extracción facial biométrica local de alta precisión con Google MediaPipe Face Mesh.
+ * Identifica iris exacto, tono/subtono dérmico y visagismo óseo sin enviar imágenes fuera del dispositivo.
+ * La foto resultante se comprime automáticamente a formato WebP ultraligero (~15-20 KB).
  */
 export const extractLocalBiometricFeatures = async (
   file: File
 ): Promise<FacialAnalysisResult> => {
   return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const img = new Image();
-      img.onload = () => {
-        // 1. Conservar relación de aspecto original de la foto para guardado en local (ultra-comprimido para mínimo peso)
-        const origWidth = img.naturalWidth || img.width || 600;
-        const origHeight = img.naturalHeight || img.height || 800;
-        const maxDim = 380;
-        let saveW = origWidth;
-        let saveH = origHeight;
-        if (saveW > maxDim || saveH > maxDim) {
-          if (saveW > saveH) {
-            saveH = Math.round((saveH * maxDim) / saveW);
-            saveW = maxDim;
-          } else {
-            saveW = Math.round((saveW * maxDim) / saveH);
-            saveH = maxDim;
-          }
-        }
-
-        const saveCanvas = document.createElement('canvas');
-        saveCanvas.width = saveW;
-        saveCanvas.height = saveH;
-        const sCtx = saveCanvas.getContext('2d');
-        if (sCtx) {
-          sCtx.imageSmoothingEnabled = true;
-          sCtx.imageSmoothingQuality = 'high';
-          sCtx.drawImage(img, 0, 0, saveW, saveH);
-        }
-        // Foto de perfil ultraligera en WebP o JPEG de calidad optimizada (~15-20 KB)
-        let facePhotoDataUrl = '';
+      img.onload = async () => {
         try {
-          const webp = saveCanvas.toDataURL('image/webp', 0.76);
-          facePhotoDataUrl = (webp && webp.startsWith('data:image/webp')) ? webp : saveCanvas.toDataURL('image/jpeg', 0.76);
-        } catch {
-          facePhotoDataUrl = saveCanvas.toDataURL('image/jpeg', 0.76);
-        }
+          const origWidth = img.naturalWidth || img.width || 600;
+          const origHeight = img.naturalHeight || img.height || 800;
 
-        // 2. Canvas de medición normalizado (recorte centrado proporcional sin aplastar píxeles)
-        const canvas = document.createElement('canvas');
-        canvas.width = 240;
-        canvas.height = 240;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve({ ...getDefaultAnalysis(), facePhotoDataUrl });
-          return;
-        }
-
-        const scale = Math.max(240 / origWidth, 240 / origHeight);
-        const cropX = (origWidth - 240 / scale) / 2;
-        const cropY = (origHeight - 240 / scale) / 2;
-        ctx.drawImage(img, cropX, cropY, 240 / scale, 240 / scale, 0, 0, 240, 240);
-
-        // 1. ZONA MEJILLAS & PUENTE NASAL (Piel y subtono)
-        const skinData = ctx.getImageData(80, 100, 80, 50).data;
-        let sR = 0, sG = 0, sB = 0, sCount = 0;
-        for (let i = 0; i < skinData.length; i += 4) {
-          sR += skinData[i];
-          sG += skinData[i + 1];
-          sB += skinData[i + 2];
-          sCount++;
-        }
-        const avgSkinR = sCount > 0 ? sR / sCount : 205;
-        const avgSkinG = sCount > 0 ? sG / sCount : 175;
-        const avgSkinB = sCount > 0 ? sB / sCount : 155;
-        const skinBrightness = (avgSkinR + avgSkinG + avgSkinB) / 3;
-
-        // Subtono de piel
-        let undertone: 'calido' | 'frio' | 'neutro' = 'neutro';
-        if (avgSkinR > avgSkinB * 1.22) {
-          undertone = 'calido';
-        } else if (avgSkinB > avgSkinG * 0.96 || Math.abs(avgSkinR - avgSkinB) < 18) {
-          undertone = 'frio';
-        }
-
-        // Tono / Luminosidad de piel
-        let skinTone: 'muy_claro' | 'claro' | 'medio' | 'bronceado' | 'oscuro' = 'medio';
-        if (skinBrightness > 215) skinTone = 'muy_claro';
-        else if (skinBrightness > 175) skinTone = 'claro';
-        else if (skinBrightness > 135) skinTone = 'medio';
-        else if (skinBrightness > 95) skinTone = 'bronceado';
-        else skinTone = 'oscuro';
-
-        // 2. ZONA CABELLO / NACIMIENTO (y: 15-50, x: 60-180)
-        const hairData = ctx.getImageData(60, 15, 120, 35).data;
-        let hR = 0, hG = 0, hB = 0, hCount = 0;
-        for (let i = 0; i < hairData.length; i += 4) {
-          hR += hairData[i];
-          hG += hairData[i + 1];
-          hB += hairData[i + 2];
-          hCount++;
-        }
-        const avgHairR = hCount > 0 ? hR / hCount : 70;
-        const avgHairG = hCount > 0 ? hG / hCount : 50;
-        const avgHairB = hCount > 0 ? hB / hCount : 40;
-        const hairBrightness = (avgHairR + avgHairG + avgHairB) / 3;
-
-        let detectedHair = 'Castaño oscuro';
-        if (hairBrightness < 55) {
-          detectedHair = 'Negro azabache';
-        } else if (avgHairR > avgHairG * 1.3 && avgHairR > avgHairB * 1.4 && avgHairR > 90) {
-          detectedHair = 'Pelirrojo / Cobrizo cálido';
-        } else if (hairBrightness > 135) {
-          detectedHair = undertone === 'calido' ? 'Rubio dorado luminoso' : 'Rubio ceniza / Platino';
-        } else if (avgHairR > avgHairB * 1.2) {
-          detectedHair = 'Castaño avellana / Miel';
-        } else {
-          detectedHair = 'Castaño chocolate';
-        }
-
-        // 3. ZONA OCULAR & IRIS (y: 75-105, x: 65-100 y x: 140-175)
-        const eyeLeftData = ctx.getImageData(65, 75, 35, 30).data;
-        const eyeRightData = ctx.getImageData(140, 75, 35, 30).data;
-        let irisPixels: { r: number; g: number; b: number }[] = [];
-
-        const collectIris = (data: Uint8ClampedArray) => {
-          for (let i = 0; i < data.length; i += 4) {
-            const r = data[i], g = data[i + 1], b = data[i + 2];
-            const br = (r + g + b) / 3;
-            // Filtrar esclerótica blanca (br > 210) y sombras extremas (br < 25)
-            if (br > 30 && br < 160) {
-              irisPixels.push({ r, g, b });
+          // 1. Guardar copia de la foto de análisis comprimida automáticamente (~15-20 KB)
+          const maxDim = 380;
+          let saveW = origWidth;
+          let saveH = origHeight;
+          if (saveW > maxDim || saveH > maxDim) {
+            if (saveW > saveH) {
+              saveH = Math.round((saveH * maxDim) / saveW);
+              saveW = maxDim;
+            } else {
+              saveW = Math.round((saveW * maxDim) / saveH);
+              saveH = maxDim;
             }
           }
-        };
-        collectIris(eyeLeftData);
-        collectIris(eyeRightData);
 
-        let detectedEyes = 'Miel / Marrón cálido';
-        if (irisPixels.length > 0) {
-          const sumI = irisPixels.reduce((acc, p) => ({ r: acc.r + p.r, g: acc.g + p.g, b: acc.b + p.b }), { r: 0, g: 0, b: 0 });
-          const irR = sumI.r / irisPixels.length;
-          const irG = sumI.g / irisPixels.length;
-          const irB = sumI.b / irisPixels.length;
-          const eyeBr = (irR + irG + irB) / 3;
-
-          if (irB > irR * 1.15 && irB > 65) {
-            detectedEyes = 'Azul zafiro / Gris azulado';
-          } else if (irG > irB * 1.1 && irG > irR * 0.95 && eyeBr > 65) {
-            detectedEyes = 'Verde oliva / Avellana';
-          } else if (irR > irB * 1.3 && eyeBr > 70) {
-            detectedEyes = 'Miel / Ámbar dorado';
-          } else if (eyeBr < 60) {
-            detectedEyes = 'Marrón café profundo';
-          } else {
-            detectedEyes = 'Marrón castaño suave';
+          const saveCanvas = document.createElement('canvas');
+          saveCanvas.width = saveW;
+          saveCanvas.height = saveH;
+          const sCtx = saveCanvas.getContext('2d');
+          if (sCtx) {
+            sCtx.imageSmoothingEnabled = true;
+            sCtx.imageSmoothingQuality = 'high';
+            sCtx.drawImage(img, 0, 0, saveW, saveH);
           }
+
+          let initialPhotoDataUrl = '';
+          try {
+            const webp = saveCanvas.toDataURL('image/webp', 0.76);
+            initialPhotoDataUrl = (webp && webp.startsWith('data:image/webp')) ? webp : saveCanvas.toDataURL('image/jpeg', 0.76);
+          } catch {
+            initialPhotoDataUrl = saveCanvas.toDataURL('image/jpeg', 0.76);
+          }
+          const facePhotoDataUrl = await compressImageForStorage(initialPhotoDataUrl, 380, 0.76);
+
+          // 2. Intentar detección con Google MediaPipe FaceLandmarker
+          const landmarker = await getFaceLandmarker();
+          if (landmarker) {
+            const detection = landmarker.detect(img);
+            if (detection.faceLandmarks && detection.faceLandmarks.length > 0) {
+              const landmarks = detection.faceLandmarks[0];
+
+              // Canvas de medición de alta definición para muestreo anatómico
+              const measureCanvas = document.createElement('canvas');
+              const W = Math.min(1000, origWidth);
+              const H = Math.round((W * origHeight) / origWidth);
+              measureCanvas.width = W;
+              measureCanvas.height = H;
+              const mCtx = measureCanvas.getContext('2d');
+
+              if (mCtx) {
+                mCtx.drawImage(img, 0, 0, W, H);
+
+                // A. DETECCIÓN EXACTA DEL COLOR DE OJOS (IRIS)
+                let leftIrisX = 0, leftIrisY = 0, rightIrisX = 0, rightIrisY = 0;
+                if (landmarks.length >= 478) {
+                  leftIrisX = landmarks[468].x * W;
+                  leftIrisY = landmarks[468].y * H;
+                  rightIrisX = landmarks[473].x * W;
+                  rightIrisY = landmarks[473].y * H;
+                } else {
+                  leftIrisX = ((landmarks[33].x + landmarks[133].x) / 2) * W;
+                  leftIrisY = ((landmarks[159].y + landmarks[145].y) / 2) * H;
+                  rightIrisX = ((landmarks[362].x + landmarks[263].x) / 2) * W;
+                  rightIrisY = ((landmarks[386].y + landmarks[374].y) / 2) * H;
+                }
+
+                const eyeWidthLeft = Math.hypot((landmarks[133].x - landmarks[33].x) * W, (landmarks[133].y - landmarks[33].y) * H);
+                const irisRadius = Math.max(3, Math.min(22, Math.round(eyeWidthLeft * 0.22)));
+
+                const irisSamples: { r: number; g: number; b: number }[] = [];
+                const sampleIrisRing = (cx: number, cy: number) => {
+                  const rad = Math.round(irisRadius);
+                  const imgData = mCtx.getImageData(
+                    Math.max(0, Math.round(cx - rad)),
+                    Math.max(0, Math.round(cy - rad)),
+                    rad * 2 + 1,
+                    rad * 2 + 1
+                  );
+                  const d = imgData.data;
+                  for (let i = 0; i < d.length; i += 4) {
+                    const r = d[i], g = d[i + 1], b = d[i + 2];
+                    const br = (r + g + b) / 3;
+                    // Descartar pupila central oscura y esclera blanca
+                    if (br >= 32 && br <= 190) {
+                      irisSamples.push({ r, g, b });
+                    }
+                  }
+                };
+                sampleIrisRing(leftIrisX, leftIrisY);
+                sampleIrisRing(rightIrisX, rightIrisY);
+
+                let detectedEyes = 'Marrón castaño cálido';
+                if (irisSamples.length > 0) {
+                  const avgR = irisSamples.reduce((a, b) => a + b.r, 0) / irisSamples.length;
+                  const avgG = irisSamples.reduce((a, b) => a + b.g, 0) / irisSamples.length;
+                  const avgB = irisSamples.reduce((a, b) => a + b.b, 0) / irisSamples.length;
+                  const hsl = rgbToHsl(avgR, avgG, avgB);
+
+                  if (hsl.h >= 170 && hsl.h <= 255 && (avgB > avgR * 1.05 || hsl.s > 0.14)) {
+                    detectedEyes = 'Azul zafiro / Cielo';
+                  } else if (hsl.h >= 65 && hsl.h < 170 && (avgG > avgB * 1.05 || hsl.s > 0.14)) {
+                    detectedEyes = 'Verde oliva / Avellana';
+                  } else if (hsl.h >= 32 && hsl.h < 65 && hsl.s > 0.18 && hsl.l > 0.28) {
+                    detectedEyes = 'Miel / Ámbar cálido';
+                  } else if (hsl.s < 0.13 && hsl.l > 0.28 && hsl.l < 0.68) {
+                    detectedEyes = 'Gris perla / Azul verdoso';
+                  } else if (hsl.l < 0.22 || (avgR + avgG + avgB) / 3 < 52) {
+                    detectedEyes = 'Marrón café profundo';
+                  } else {
+                    detectedEyes = 'Marrón castaño cálido';
+                  }
+                }
+
+                // B. TONO Y SUBTONO DE PIEL (Muestreo en pómulos y frente sin reflejos)
+                const skinIndices = [117, 118, 50, 205, 346, 347, 280, 425, 109, 67, 297, 338];
+                const skinSamples: { r: number; g: number; b: number }[] = [];
+                skinIndices.forEach((idx) => {
+                  if (landmarks[idx]) {
+                    const px = Math.round(landmarks[idx].x * W);
+                    const py = Math.round(landmarks[idx].y * H);
+                    const block = mCtx.getImageData(Math.max(0, px - 3), Math.max(0, py - 3), 7, 7).data;
+                    for (let i = 0; i < block.length; i += 4) {
+                      skinSamples.push({ r: block[i], g: block[i + 1], b: block[i + 2] });
+                    }
+                  }
+                });
+
+                let avgSkinR = 210, avgSkinG = 180, avgSkinB = 160;
+                if (skinSamples.length > 0) {
+                  avgSkinR = skinSamples.reduce((a, b) => a + b.r, 0) / skinSamples.length;
+                  avgSkinG = skinSamples.reduce((a, b) => a + b.g, 0) / skinSamples.length;
+                  avgSkinB = skinSamples.reduce((a, b) => a + b.b, 0) / skinSamples.length;
+                }
+                const skinBrightness = (avgSkinR + avgSkinG + avgSkinB) / 3;
+
+                let skinTone: 'muy_claro' | 'claro' | 'medio' | 'bronceado' | 'oscuro' = 'medio';
+                if (skinBrightness > 200) skinTone = 'muy_claro';
+                else if (skinBrightness > 165) skinTone = 'claro';
+                else if (skinBrightness > 130) skinTone = 'medio';
+                else if (skinBrightness > 95) skinTone = 'bronceado';
+                else skinTone = 'oscuro';
+
+                const warmthIndex = (avgSkinR - avgSkinB) / (avgSkinR + avgSkinG + avgSkinB || 1);
+                let undertone: 'calido' | 'frio' | 'neutro' = 'neutro';
+                if (warmthIndex > 0.16 && avgSkinR > avgSkinG * 1.14) {
+                  undertone = 'calido';
+                } else if (warmthIndex < 0.11 || avgSkinB > avgSkinG * 0.92) {
+                  undertone = 'frio';
+                } else {
+                  undertone = 'neutro';
+                }
+
+                // C. COLOR DE CABELLO
+                const hairSamples: { r: number; g: number; b: number }[] = [];
+                const hairOffsets = [
+                  { x: landmarks[10].x, y: landmarks[10].y - 0.08 },
+                  { x: landmarks[10].x, y: landmarks[10].y - 0.14 },
+                  { x: landmarks[103].x, y: landmarks[103].y - 0.06 },
+                  { x: landmarks[332].x, y: landmarks[332].y - 0.06 }
+                ];
+                hairOffsets.forEach((pt) => {
+                  const px = Math.max(0, Math.min(W - 1, Math.round(pt.x * W)));
+                  const py = Math.max(0, Math.min(H - 1, Math.round(pt.y * H)));
+                  const block = mCtx.getImageData(Math.max(0, px - 4), Math.max(0, py - 4), 9, 9).data;
+                  for (let i = 0; i < block.length; i += 4) {
+                    hairSamples.push({ r: block[i], g: block[i + 1], b: block[i + 2] });
+                  }
+                });
+
+                let avgHairR = 60, avgHairG = 45, avgHairB = 35;
+                if (hairSamples.length > 0) {
+                  avgHairR = hairSamples.reduce((a, b) => a + b.r, 0) / hairSamples.length;
+                  avgHairG = hairSamples.reduce((a, b) => a + b.g, 0) / hairSamples.length;
+                  avgHairB = hairSamples.reduce((a, b) => a + b.b, 0) / hairSamples.length;
+                }
+                const hairBrightness = (avgHairR + avgHairG + avgHairB) / 3;
+
+                let detectedHair = 'Castaño chocolate';
+                if (hairBrightness < 50) {
+                  detectedHair = 'Negro azabache';
+                } else if (avgHairR > avgHairG * 1.35 && avgHairR > avgHairB * 1.45 && avgHairR > 85) {
+                  detectedHair = 'Pelirrojo / Cobrizo cálido';
+                } else if (hairBrightness > 130) {
+                  detectedHair = undertone === 'calido' ? 'Rubio dorado luminoso' : 'Rubio ceniza / Platino';
+                } else if (avgHairR > avgHairB * 1.25) {
+                  detectedHair = 'Castaño avellana / Miel';
+                } else {
+                  detectedHair = 'Castaño chocolate';
+                }
+
+                // D. FORMA DE ROSTRO (VISAGISMO ANATÓMICO POR DISTANCIAS ÓSEAS)
+                const zygomaWidth = Math.hypot((landmarks[454].x - landmarks[234].x) * W, (landmarks[454].y - landmarks[234].y) * H);
+                const jawWidth = Math.hypot((landmarks[397].x - landmarks[172].x) * W, (landmarks[397].y - landmarks[172].y) * H);
+                const templeWidth = Math.hypot((landmarks[332].x - landmarks[103].x) * W, (landmarks[332].y - landmarks[103].y) * H);
+                const faceHeight = Math.hypot((landmarks[152].x - landmarks[10].x) * W, (landmarks[152].y - landmarks[10].y) * H);
+
+                const lengthToCheek = faceHeight / (zygomaWidth || 1);
+                const jawToCheek = jawWidth / (zygomaWidth || 1);
+                const foreheadToCheek = templeWidth / (zygomaWidth || 1);
+
+                let faceShape: FaceShape = 'ovalada';
+                if (lengthToCheek > 1.45) {
+                  faceShape = 'alargada';
+                } else if (jawToCheek > 0.86) {
+                  faceShape = lengthToCheek < 1.26 ? 'cuadrada' : 'ovalada';
+                } else if (lengthToCheek < 1.22 && jawToCheek > 0.77) {
+                  faceShape = 'redonda';
+                } else if (foreheadToCheek > 0.88 && jawToCheek < 0.72) {
+                  faceShape = 'corazon';
+                } else if (foreheadToCheek < 0.78 && jawToCheek < 0.74) {
+                  faceShape = 'diamante';
+                } else {
+                  faceShape = 'ovalada';
+                }
+
+                // E. CONTRASTE Y ARMONÍA CROMÁTICA
+                const contrastDelta = Math.abs(skinBrightness - hairBrightness);
+                let facialContrast: FacialContrast = 'medio';
+                if (contrastDelta > 90) facialContrast = 'alto';
+                else if (contrastDelta < 48) facialContrast = 'suave';
+
+                const colorSeason = calculateColorSeason({
+                  skinUndertone: undertone,
+                  skinTone,
+                  facialContrast,
+                  eyeColor: detectedEyes,
+                  hairColor: detectedHair
+                });
+
+                const jewelryTip = getJewelryTip(faceShape, undertone);
+                const necklineTip = getNecklineTip(faceShape);
+                const eyewearTip = getEyewearTip(faceShape);
+
+                const summaryText = `Análisis Facial completado con IA biométrica: Rostro ${faceShape.toUpperCase()} con contraste ${facialContrast}. Piel de subtono ${undertone} (${skinTone}), ojos ${detectedEyes} y cabello ${detectedHair}. Tu Armonía Cromática Personal ideal es ${colorSeason}.`;
+
+                resolve({
+                  skinTone,
+                  skinUndertone: undertone,
+                  eyeColor: detectedEyes,
+                  hairColor: detectedHair,
+                  faceShape,
+                  facialContrast,
+                  colorSeason,
+                  summaryText,
+                  jewelryTip,
+                  necklineTip,
+                  eyewearTip,
+                  facePhotoDataUrl
+                });
+                return;
+              }
+            }
+          }
+
+          // Fallback Heurístico si no hay conexión o no se detectó rostro con MediaPipe
+          const fallbackRes = runHeuristicFallback(img, origWidth, origHeight, facePhotoDataUrl);
+          resolve(fallbackRes);
+        } catch (err) {
+          console.error('Error durante el análisis facial:', err);
+          resolve(getDefaultAnalysis());
         }
-
-        // 4. FORMA DE CARA & VISAGISMO (Proporciones ancho / alto)
-        // Estimación por silueta y contorno facial
-        const imgAspect = img.naturalHeight / (img.naturalWidth || 1);
-        let faceShape: FaceShape = 'ovalada';
-        
-        // Medir ancho facial a distintos niveles
-        const widthTop = estimateSkinWidthAtY(ctx, 70);
-        const widthMiddle = estimateSkinWidthAtY(ctx, 120);
-        const widthJaw = estimateSkinWidthAtY(ctx, 170);
-
-        const jawToCheekRatio = widthMiddle > 0 ? widthJaw / widthMiddle : 0.75;
-        const foreheadToCheekRatio = widthMiddle > 0 ? widthTop / widthMiddle : 0.85;
-
-        if (jawToCheekRatio > 0.88 && imgAspect < 1.15) {
-          faceShape = 'cuadrada';
-        } else if (jawToCheekRatio > 0.82 && imgAspect < 1.18) {
-          faceShape = 'redonda';
-        } else if (jawToCheekRatio < 0.65 && foreheadToCheekRatio > 0.85) {
-          faceShape = 'corazon';
-        } else if (foreheadToCheekRatio < 0.75 && jawToCheekRatio < 0.75) {
-          faceShape = 'diamante';
-        } else if (imgAspect > 1.35 || (widthMiddle > 0 && 200 / widthMiddle > 1.5)) {
-          faceShape = 'alargada';
-        } else {
-          faceShape = 'ovalada';
-        }
-
-        // 5. CONTRASTE FACIAL
-        const contrastDelta = Math.abs(skinBrightness - hairBrightness);
-        let facialContrast: FacialContrast = 'medio';
-        if (contrastDelta > 95) facialContrast = 'alto';
-        else if (contrastDelta < 50) facialContrast = 'suave';
-
-        // 6. ARMONÍA CROMÁTICA PERSONAL
-        const colorSeason: ColorSeason = calculateColorSeason({
-          skinUndertone: undertone,
-          skinTone,
-          facialContrast,
-          eyeColor: detectedEyes,
-          hairColor: detectedHair
-        });
-
-        // 7. CONSEJOS DE VISAGISMO PERSONALIZADOS
-        const jewelryTip = getJewelryTip(faceShape, undertone);
-        const necklineTip = getNecklineTip(faceShape);
-        const eyewearTip = getEyewearTip(faceShape);
-
-        const summaryText = `Análisis Facial completado: Rostro ${faceShape.toUpperCase()} con contraste ${facialContrast}. Piel de subtono ${undertone} (${skinTone}), ojos ${detectedEyes} y cabello ${detectedHair}. Tu Armonía Cromática Personal ideal es ${colorSeason}.`;
-
-        resolve({
-          skinTone,
-          skinUndertone: undertone,
-          eyeColor: detectedEyes,
-          hairColor: detectedHair,
-          faceShape,
-          facialContrast,
-          colorSeason,
-          summaryText,
-          jewelryTip,
-          necklineTip,
-          eyewearTip,
-          facePhotoDataUrl
-        });
       };
       img.onerror = () => resolve(getDefaultAnalysis());
       img.src = e.target?.result as string;
@@ -821,24 +956,109 @@ export const extractLocalBiometricFeatures = async (
   });
 };
 
-function estimateSkinWidthAtY(ctx: CanvasRenderingContext2D, y: number): number {
-  try {
-    const row = ctx.getImageData(20, y, 200, 1).data;
-    let firstSkin = -1;
-    let lastSkin = -1;
-    for (let i = 0; i < row.length; i += 4) {
-      const r = row[i], g = row[i + 1], b = row[i + 2];
-      // Típico criterio de piel humana en espacio RGB
-      if (r > 60 && g > 40 && b > 20 && r > b && (r - g) > 10) {
-        const x = i / 4;
-        if (firstSkin === -1) firstSkin = x;
-        lastSkin = x;
-      }
-    }
-    return firstSkin !== -1 && lastSkin !== -1 ? lastSkin - firstSkin : 100;
-  } catch {
-    return 100;
+function runHeuristicFallback(
+  img: HTMLImageElement,
+  origWidth: number,
+  origHeight: number,
+  facePhotoDataUrl: string
+): FacialAnalysisResult {
+  const canvas = document.createElement('canvas');
+  canvas.width = 240;
+  canvas.height = 240;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return { ...getDefaultAnalysis(), facePhotoDataUrl };
   }
+
+  const scale = Math.max(240 / origWidth, 240 / origHeight);
+  const cropX = (origWidth - 240 / scale) / 2;
+  const cropY = (origHeight - 240 / scale) / 2;
+  ctx.drawImage(img, cropX, cropY, 240 / scale, 240 / scale, 0, 0, 240, 240);
+
+  const skinData = ctx.getImageData(80, 100, 80, 50).data;
+  let sR = 0, sG = 0, sB = 0, sCount = 0;
+  for (let i = 0; i < skinData.length; i += 4) {
+    sR += skinData[i];
+    sG += skinData[i + 1];
+    sB += skinData[i + 2];
+    sCount++;
+  }
+  const avgSkinR = sCount > 0 ? sR / sCount : 205;
+  const avgSkinG = sCount > 0 ? sG / sCount : 175;
+  const avgSkinB = sCount > 0 ? sB / sCount : 155;
+  const skinBrightness = (avgSkinR + avgSkinG + avgSkinB) / 3;
+
+  let undertone: 'calido' | 'frio' | 'neutro' = 'neutro';
+  if (avgSkinR > avgSkinB * 1.22) {
+    undertone = 'calido';
+  } else if (avgSkinB > avgSkinG * 0.96 || Math.abs(avgSkinR - avgSkinB) < 18) {
+    undertone = 'frio';
+  }
+
+  let skinTone: 'muy_claro' | 'claro' | 'medio' | 'bronceado' | 'oscuro' = 'medio';
+  if (skinBrightness > 215) skinTone = 'muy_claro';
+  else if (skinBrightness > 175) skinTone = 'claro';
+  else if (skinBrightness > 135) skinTone = 'medio';
+  else if (skinBrightness > 95) skinTone = 'bronceado';
+  else skinTone = 'oscuro';
+
+  const hairData = ctx.getImageData(60, 15, 120, 35).data;
+  let hR = 0, hG = 0, hB = 0, hCount = 0;
+  for (let i = 0; i < hairData.length; i += 4) {
+    hR += hairData[i];
+    hG += hairData[i + 1];
+    hB += hairData[i + 2];
+    hCount++;
+  }
+  const avgHairR = hCount > 0 ? hR / hCount : 70;
+  const avgHairG = hCount > 0 ? hG / hCount : 50;
+  const avgHairB = hCount > 0 ? hB / hCount : 40;
+  const hairBrightness = (avgHairR + avgHairG + avgHairB) / 3;
+
+  let detectedHair = 'Castaño chocolate';
+  if (hairBrightness < 55) detectedHair = 'Negro azabache';
+  else if (avgHairR > avgHairG * 1.3 && avgHairR > avgHairB * 1.4 && avgHairR > 90) detectedHair = 'Pelirrojo / Cobrizo cálido';
+  else if (hairBrightness > 135) detectedHair = undertone === 'calido' ? 'Rubio dorado luminoso' : 'Rubio ceniza / Platino';
+  else if (avgHairR > avgHairB * 1.2) detectedHair = 'Castaño avellana / Miel';
+
+  const detectedEyes = 'Marrón castaño cálido';
+  const imgAspect = img.naturalHeight / (img.naturalWidth || 1);
+  let faceShape: FaceShape = 'ovalada';
+  if (imgAspect > 1.35) faceShape = 'alargada';
+
+  const contrastDelta = Math.abs(skinBrightness - hairBrightness);
+  let facialContrast: FacialContrast = 'medio';
+  if (contrastDelta > 95) facialContrast = 'alto';
+  else if (contrastDelta < 50) facialContrast = 'suave';
+
+  const colorSeason = calculateColorSeason({
+    skinUndertone: undertone,
+    skinTone,
+    facialContrast,
+    eyeColor: detectedEyes,
+    hairColor: detectedHair
+  });
+
+  const jewelryTip = getJewelryTip(faceShape, undertone);
+  const necklineTip = getNecklineTip(faceShape);
+  const eyewearTip = getEyewearTip(faceShape);
+
+  const summaryText = `Análisis Facial completado: Rostro ${faceShape.toUpperCase()} con contraste ${facialContrast}. Piel de subtono ${undertone} (${skinTone}), ojos ${detectedEyes} y cabello ${detectedHair}. Tu Armonía Cromática Personal ideal es ${colorSeason}.`;
+
+  return {
+    skinTone,
+    skinUndertone: undertone,
+    eyeColor: detectedEyes,
+    hairColor: detectedHair,
+    faceShape,
+    facialContrast,
+    colorSeason,
+    summaryText,
+    jewelryTip,
+    necklineTip,
+    eyewearTip,
+    facePhotoDataUrl
+  };
 }
 
 export const getJewelryTip = (shape: FaceShape, undertone: 'calido' | 'frio' | 'neutro'): string => {
