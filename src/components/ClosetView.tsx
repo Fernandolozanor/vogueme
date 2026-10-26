@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import type { ClothingItem, Category, StyleTag, Season } from '../types';
 import { INITIAL_CLOTHES } from '../data/initialData';
-import { processGarmentImage, applyCustomCutout } from '../services/imageProcessing';
+import { processGarmentImage, applyCustomCutout, compressImageForStorage } from '../services/imageProcessing';
 import { 
   addClothingItem, 
   updateClothingItem,
@@ -238,8 +238,11 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
     }
   };
 
-  const handleSaveItem = () => {
+  const handleSaveItem = async () => {
     if (!previewImage) return;
+
+    // Compresión final automática WebP antes de almacenar para mínimo peso en memoria
+    const finalImageUrl = await compressImageForStorage(previewImage, 520, 0.82);
 
     if (editingItem) {
       const updatedItem: ClothingItem = {
@@ -254,10 +257,10 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
         wearCount: Math.max(0, parseInt(itemWearCount.toString()) || 0),
         seasons: itemSeasons.length > 0 ? itemSeasons : ['todas'],
         styles: itemStyles.length > 0 ? itemStyles : ['casual'],
-        imageUrl: previewImage || editingItem.imageUrl
+        imageUrl: finalImageUrl || editingItem.imageUrl
       };
 
-      const updated = updateClothingItem(updatedItem);
+      const updated = updateClothingItem(updatedItem, wardrobe);
       onWardrobeChange(updated);
       setIsAddModalOpen(false);
       resetForm();
@@ -275,13 +278,13 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
       purchasePrice: itemPrice ? parseFloat(itemPrice) : undefined,
       seasons: itemSeasons.length > 0 ? itemSeasons : ['todas'],
       styles: itemStyles.length > 0 ? itemStyles : ['casual', 'chic'],
-      imageUrl: previewImage,
+      imageUrl: finalImageUrl,
       wearCount: Math.max(0, parseInt(itemWearCount.toString()) || 0),
       dateAdded: new Date().toISOString().split('T')[0],
       isFavorite: false
     };
 
-    const updated = addClothingItem(newItem);
+    const updated = addClothingItem(newItem, wardrobe);
     onWardrobeChange(updated);
     setIsAddModalOpen(false);
     resetForm();
@@ -310,13 +313,13 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
 
   const handleDelete = (id: string) => {
     if (confirm('¿Eliminar esta prenda de tu armario?')) {
-      const updated = deleteClothingItem(id);
+      const updated = deleteClothingItem(id, wardrobe);
       onWardrobeChange(updated);
     }
   };
 
   const handleToggleFavorite = (id: string) => {
-    const updated = toggleFavoriteItem(id);
+    const updated = toggleFavoriteItem(id, wardrobe);
     onWardrobeChange(updated);
   };
 
@@ -327,13 +330,13 @@ export const ClosetView: React.FC<ClosetViewProps> = ({ wardrobe, onWardrobeChan
 
   const handleRemoveSampleClothes = () => {
     if (confirm(`¿Eliminar las ${sampleClothesCount} prendas de ejemplo? Si tienes prendas añadidas por ti, se mantendrán intactas.`)) {
-      const updated = removeSampleClothes();
+      const updated = removeSampleClothes(wardrobe);
       onWardrobeChange(updated);
     }
   };
 
   const handleRestoreSampleClothes = () => {
-    const updated = restoreSampleClothes();
+    const updated = restoreSampleClothes(wardrobe);
     onWardrobeChange(updated);
   };
 

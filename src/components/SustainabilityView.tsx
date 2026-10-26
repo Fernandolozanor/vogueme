@@ -310,7 +310,7 @@ export const SustainabilityView: React.FC<SustainabilityViewProps> = ({
         role={selectedGarment?.role}
         onClose={() => setSelectedGarment(null)}
         onToggleFavorite={(id) => {
-          const updated = toggleFavoriteItem(id);
+          const updated = toggleFavoriteItem(id, wardrobe);
           onWardrobeChange?.(updated);
           if (selectedGarment && selectedGarment.item.id === id) {
             setSelectedGarment(prev => prev ? {

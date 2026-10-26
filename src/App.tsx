@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navbar, type NavTab } from './components/Navbar';
 import { StylistView } from './components/StylistView';
 import { ClosetView } from './components/ClosetView';
@@ -9,7 +9,7 @@ import { SustainabilityView } from './components/SustainabilityView';
 import { InstallPwaPrompt } from './components/InstallPwaPrompt';
 import { OutfitCalendarModal } from './components/OutfitCalendarModal';
 import type { ClothingItem, UserProfile } from './types';
-import { getStoredClothes, getStoredProfile } from './services/storage';
+import { getStoredClothes, getStoredProfile, initStorage } from './services/storage';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('stylist');
@@ -17,8 +17,18 @@ export function App() {
   const [profile, setProfile] = useState<UserProfile>(() => getStoredProfile());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  const handleRefreshWardrobe = () => {
-    setWardrobe(getStoredClothes());
+  useEffect(() => {
+    // Sincronizar el armario completo desde IndexedDB (alta capacidad sin límite de 5MB)
+    initStorage().then((loaded) => {
+      if (loaded && loaded.length > 0) {
+        setWardrobe(loaded);
+      }
+    });
+  }, []);
+
+  const handleRefreshWardrobe = async () => {
+    const updated = await initStorage();
+    setWardrobe(updated);
   };
 
   const handleProfileUpdate = (updated: UserProfile) => {

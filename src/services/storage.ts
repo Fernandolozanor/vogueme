@@ -1,10 +1,141 @@
 import type { ClothingItem, UserProfile } from '../types';
 import { normalizeColorHarmony } from '../types';
 import { INITIAL_CLOTHES, INITIAL_USER_PROFILE } from '../data/initialData';
+import { compressImageForStorage } from './imageProcessing';
 
 const CLOTHES_STORAGE_KEY = 'vogueme_clothes_v1';
 const PROFILE_STORAGE_KEY = 'vogueme_profile_v1';
 const OUTFIT_HISTORY_KEY = 'vogueme_outfit_history_v1';
+
+// Almacenamiento IndexedDB de alta capacidad (sin límite de 5MB)
+const IDB_NAME = 'vogueme_local_db';
+const IDB_VERSION = 1;
+const IDB_STORE = 'wardrobe_store';
+
+// Caché en memoria para respuesta síncrona instantánea y sincronización fiable
+let memoryWardrobeCache: ClothingItem[] | null = null;
+
+function openIdb(): Promise<IDBDatabase | null> {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined' || !window.indexedDB) {
+      resolve(null);
+      return;
+    }
+    try {
+      const request = indexedDB.open(IDB_NAME, IDB_VERSION);
+      request.onupgradeneeded = (e) => {
+        const db = (e.target as IDBOpenDBRequest).result;
+        if (!db.objectStoreNames.contains(IDB_STORE)) {
+          db.createObjectStore(IDB_STORE);
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => {
+        console.warn('No se pudo abrir IndexedDB, usando fallback', request.error);
+        resolve(null);
+      };
+    } catch (err) {
+      console.warn('IndexedDB no disponible:', err);
+      resolve(null);
+    }
+  });
+}
+
+export async function idbSaveClothes(clothes: ClothingItem[]): Promise<void> {
+  try {
+    const db = await openIdb();
+    if (!db) return;
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      const store = tx.objectStore(IDB_STORE);
+      const req = store.put(clothes, 'wardrobe');
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.error('Error guardando en IndexedDB:', err);
+  }
+}
+
+export async function idbGetClothes(): Promise<ClothingItem[] | null> {
+  try {
+    const db = await openIdb();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const store = tx.objectStore(IDB_STORE);
+      const req = store.get('wardrobe');
+      req.onsuccess = () => {
+        if (req.result && Array.isArray(req.result)) {
+          resolve(req.result as ClothingItem[]);
+        } else {
+          resolve(null);
+        }
+      };
+      req.onerror = () => resolve(null);
+    });
+  } catch (err) {
+    console.error('Error leyendo de IndexedDB:', err);
+    return null;
+  }
+}
+
+/**
+ * Inicializa el almacenamiento sincronizando IndexedDB (sin límite de 5MB)
+ * con localStorage como fallback. Si IndexedDB ya tiene prendas, las retorna.
+ * Además, comprime en segundo plano prendas existentes pesadas (>120KB) si las hubiera.
+ */
+export async function initStorage(): Promise<ClothingItem[]> {
+  try {
+    const fromIdb = await idbGetClothes();
+    let currentItems: ClothingItem[];
+
+    if (fromIdb && fromIdb.length > 0) {
+      currentItems = fromIdb;
+    } else {
+      currentItems = getStoredClothes();
+      await idbSaveClothes(currentItems);
+    }
+
+    // Auto-optimización en background de imágenes no comprimidas previas
+    let needsReSave = false;
+    const optimized = await Promise.all(
+      currentItems.map(async (item) => {
+        if (item.imageUrl && item.imageUrl.startsWith('data:image/') && item.imageUrl.length > 120000) {
+          try {
+            const compressed = await compressImageForStorage(item.imageUrl, 520, 0.82);
+            if (compressed.length < item.imageUrl.length) {
+              needsReSave = true;
+              return { ...item, imageUrl: compressed };
+            }
+          } catch {
+            // mantener original si falla
+          }
+        }
+        return item;
+      })
+    );
+
+    if (needsReSave) {
+      currentItems = optimized;
+      await idbSaveClothes(currentItems);
+    }
+
+    memoryWardrobeCache = currentItems;
+
+    // Sincronizar espejo seguro a localStorage
+    try {
+      localStorage.setItem(CLOTHES_STORAGE_KEY, JSON.stringify(currentItems));
+    } catch {
+      // Ignorar QuotaExceededError en localStorage silenciosamente
+    }
+
+    return currentItems;
+  } catch (err) {
+    console.error('Error en initStorage:', err);
+    return getStoredClothes();
+  }
+}
 
 export interface LoggedWear {
   id: string;
@@ -14,10 +145,15 @@ export interface LoggedWear {
 }
 
 export const getStoredClothes = (): ClothingItem[] => {
+  if (memoryWardrobeCache && memoryWardrobeCache.length > 0) {
+    return memoryWardrobeCache;
+  }
+
   try {
     const raw = localStorage.getItem(CLOTHES_STORAGE_KEY);
     if (!raw) {
       localStorage.setItem(CLOTHES_STORAGE_KEY, JSON.stringify(INITIAL_CLOTHES));
+      memoryWardrobeCache = INITIAL_CLOTHES;
       return INITIAL_CLOTHES;
     }
     const items: ClothingItem[] = JSON.parse(raw);
@@ -33,6 +169,7 @@ export const getStoredClothes = (): ClothingItem[] => {
     if (changed) {
       localStorage.setItem(CLOTHES_STORAGE_KEY, JSON.stringify(sanitized));
     }
+    memoryWardrobeCache = sanitized;
     return sanitized;
   } catch (err) {
     console.error('Error loading clothes from localStorage', err);
@@ -41,36 +178,42 @@ export const getStoredClothes = (): ClothingItem[] => {
 };
 
 export const saveClothes = (clothes: ClothingItem[]): void => {
+  memoryWardrobeCache = clothes;
+
+  // 1. Guardar en IndexedDB (sin límite de 5MB, almacenamiento local persistente)
+  idbSaveClothes(clothes).catch((err) => console.warn('Fallo al guardar en IndexedDB:', err));
+
+  // 2. Guardar en localStorage de forma segura
   try {
     localStorage.setItem(CLOTHES_STORAGE_KEY, JSON.stringify(clothes));
   } catch (err) {
-    console.error('Error saving clothes to localStorage', err);
+    console.warn('localStorage lleno (QuotaExceededError). Datos protegidos y persistidos con éxito en IndexedDB.', err);
   }
 };
 
-export const addClothingItem = (item: ClothingItem): ClothingItem[] => {
-  const current = getStoredClothes();
-  const updated = [item, ...current];
+export const addClothingItem = (item: ClothingItem, currentWardrobe?: ClothingItem[]): ClothingItem[] => {
+  const current = currentWardrobe || memoryWardrobeCache || getStoredClothes();
+  const updated = [item, ...current.filter(c => c.id !== item.id)];
   saveClothes(updated);
   return updated;
 };
 
-export const updateClothingItem = (item: ClothingItem): ClothingItem[] => {
-  const current = getStoredClothes();
+export const updateClothingItem = (item: ClothingItem, currentWardrobe?: ClothingItem[]): ClothingItem[] => {
+  const current = currentWardrobe || memoryWardrobeCache || getStoredClothes();
   const updated = current.map(c => c.id === item.id ? item : c);
   saveClothes(updated);
   return updated;
 };
 
-export const deleteClothingItem = (id: string): ClothingItem[] => {
-  const current = getStoredClothes();
+export const deleteClothingItem = (id: string, currentWardrobe?: ClothingItem[]): ClothingItem[] => {
+  const current = currentWardrobe || memoryWardrobeCache || getStoredClothes();
   const updated = current.filter(item => item.id !== id);
   saveClothes(updated);
   return updated;
 };
 
-export const toggleFavoriteItem = (id: string): ClothingItem[] => {
-  const current = getStoredClothes();
+export const toggleFavoriteItem = (id: string, currentWardrobe?: ClothingItem[]): ClothingItem[] => {
+  const current = currentWardrobe || memoryWardrobeCache || getStoredClothes();
   const updated = current.map(item => 
     item.id === id ? { ...item, isFavorite: !item.isFavorite } : item
   );
@@ -78,8 +221,8 @@ export const toggleFavoriteItem = (id: string): ClothingItem[] => {
   return updated;
 };
 
-export const incrementWearCount = (itemIds: string[]): ClothingItem[] => {
-  const current = getStoredClothes();
+export const incrementWearCount = (itemIds: string[], currentWardrobe?: ClothingItem[]): ClothingItem[] => {
+  const current = currentWardrobe || memoryWardrobeCache || getStoredClothes();
   const updated = current.map(item => {
     if (itemIds.includes(item.id)) {
       return { ...item, wearCount: (item.wearCount || 0) + 1 };
@@ -90,16 +233,16 @@ export const incrementWearCount = (itemIds: string[]): ClothingItem[] => {
   return updated;
 };
 
-export const removeSampleClothes = (): ClothingItem[] => {
-  const current = getStoredClothes();
+export const removeSampleClothes = (currentWardrobe?: ClothingItem[]): ClothingItem[] => {
+  const current = currentWardrobe || memoryWardrobeCache || getStoredClothes();
   const sampleIds = new Set(INITIAL_CLOTHES.map(c => c.id));
   const updated = current.filter(item => !sampleIds.has(item.id));
   saveClothes(updated);
   return updated;
 };
 
-export const restoreSampleClothes = (): ClothingItem[] => {
-  const current = getStoredClothes();
+export const restoreSampleClothes = (currentWardrobe?: ClothingItem[]): ClothingItem[] => {
+  const current = currentWardrobe || memoryWardrobeCache || getStoredClothes();
   const currentIds = new Set(current.map(c => c.id));
   const toAdd = INITIAL_CLOTHES.filter(c => !currentIds.has(c.id));
   const updated = [...current, ...toAdd];
