@@ -604,10 +604,10 @@ export const extractLocalBiometricFeatures = async (
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        // 1. Conservar relación de aspecto original de la foto para guardado en local (optimizado)
+        // 1. Conservar relación de aspecto original de la foto para guardado en local (ultra-comprimido para mínimo peso)
         const origWidth = img.naturalWidth || img.width || 600;
         const origHeight = img.naturalHeight || img.height || 800;
-        const maxDim = 480;
+        const maxDim = 380;
         let saveW = origWidth;
         let saveH = origHeight;
         if (saveW > maxDim || saveH > maxDim) {
@@ -625,10 +625,18 @@ export const extractLocalBiometricFeatures = async (
         saveCanvas.height = saveH;
         const sCtx = saveCanvas.getContext('2d');
         if (sCtx) {
+          sCtx.imageSmoothingEnabled = true;
+          sCtx.imageSmoothingQuality = 'high';
           sCtx.drawImage(img, 0, 0, saveW, saveH);
         }
-        // Foto de perfil optimizada para memoria local ultraligera
-        const facePhotoDataUrl = saveCanvas.toDataURL('image/jpeg', 0.82);
+        // Foto de perfil ultraligera en WebP o JPEG de calidad optimizada (~15-20 KB)
+        let facePhotoDataUrl = '';
+        try {
+          const webp = saveCanvas.toDataURL('image/webp', 0.76);
+          facePhotoDataUrl = (webp && webp.startsWith('data:image/webp')) ? webp : saveCanvas.toDataURL('image/jpeg', 0.76);
+        } catch {
+          facePhotoDataUrl = saveCanvas.toDataURL('image/jpeg', 0.76);
+        }
 
         // 2. Canvas de medición normalizado (recorte centrado proporcional sin aplastar píxeles)
         const canvas = document.createElement('canvas');

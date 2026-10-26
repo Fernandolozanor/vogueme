@@ -130,6 +130,23 @@ export async function initStorage(): Promise<ClothingItem[]> {
       // Ignorar QuotaExceededError en localStorage silenciosamente
     }
 
+    // Auto-optimización en background de foto de perfil previa si pesaba más de 50KB
+    try {
+      const storedProfile = getStoredProfile();
+      if (storedProfile.faceAnalysisPhoto && storedProfile.faceAnalysisPhoto.length > 50000) {
+        const compressedFace = await compressImageForStorage(storedProfile.faceAnalysisPhoto, 380, 0.76);
+        if (compressedFace.length < storedProfile.faceAnalysisPhoto.length) {
+          saveProfile({
+            ...storedProfile,
+            faceAnalysisPhoto: compressedFace,
+            avatarLocalPreview: compressedFace
+          });
+        }
+      }
+    } catch {
+      // Ignorar fallo silenciosamente
+    }
+
     return currentItems;
   } catch (err) {
     console.error('Error en initStorage:', err);

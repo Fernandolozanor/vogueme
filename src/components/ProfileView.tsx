@@ -27,7 +27,8 @@ import {
   getJewelryTip,
   getNecklineTip,
   getEyewearTip,
-  calculateColorSeason
+  calculateColorSeason,
+  compressImageForStorage
 } from '../services/imageProcessing';
 import { saveProfile } from '../services/storage';
 
@@ -446,6 +447,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
     setIsScanning(true);
     try {
       const analysis = await extractLocalBiometricFeatures(file);
+      // Compresión ultra-eficiente de la foto de análisis para mínimo peso en memoria local (~15-20 KB)
+      const compressedFacePhoto = analysis.facePhotoDataUrl 
+        ? await compressImageForStorage(analysis.facePhotoDataUrl, 380, 0.76)
+        : undefined;
       
       const updated: UserProfile = {
         ...currentProfile,
@@ -456,8 +461,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ profile, onProfileUpda
         hairColor: analysis.hairColor,
         faceShape: analysis.faceShape,
         facialContrast: analysis.facialContrast,
-        faceAnalysisPhoto: analysis.facePhotoDataUrl,
-        avatarLocalPreview: analysis.facePhotoDataUrl,
+        faceAnalysisPhoto: compressedFacePhoto,
+        avatarLocalPreview: compressedFacePhoto,
         detectedFacialFeatures: {
           skinTone: analysis.skinTone,
           skinUndertone: analysis.skinUndertone,
